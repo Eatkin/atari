@@ -1,5 +1,5 @@
 --- Symbol List (sorted by symbol)
-0.GameLineLoop           f079              (R )
+0.GameLineLoop           f089              (R )
 1.CLEAR_STACK            f006              (R )
 AUDC0                    0015                  
 AUDC1                    0016                  
@@ -13,7 +13,7 @@ COLUBK                   0009              (R )
 COLUP0                   0006                  
 COLUP1                   0007                  
 COLUPF                   0008              (R )
-CTRLPF                   000a                  
+CTRLPF                   000a              (R )
 CXBLPF                   0006                  
 CXCLR                    002c                  
 CXM0FB                   0004                  
@@ -46,10 +46,10 @@ JetXPos                  0080              (R )
 JetYPos                  0081              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-Overscan                 f07e                  
-PF0                      000d                  
-PF1                      000e                  
-PF2                      000f                  
+Overscan                 f08e                  
+PF0                      000d              (R )
+PF1                      000e              (R )
+PF2                      000f              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  

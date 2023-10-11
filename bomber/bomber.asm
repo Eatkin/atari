@@ -53,6 +53,18 @@ VisibleScanlines:
 	lda #$C2
 	sta COLUPF
 	
+	; Setup playfield
+	lda #%11110000	; PF0 uses first 4 bits and is reversed
+	sta PF0
+	lda #%11000000
+	sta PF1
+	lda #0
+	sta PF2
+
+	; Playfield reflection
+	lda #%00000001
+	sta CTRLPF
+
 	ldx #192
 .GameLineLoop:
 	; Render the 192 visible scanline

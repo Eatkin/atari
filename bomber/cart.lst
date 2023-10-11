@@ -608,86 +608,98 @@
      53  f073		       a9 c2		      lda	#$C2
      54  f075		       85 08		      sta	COLUPF
      55  f077
-     56  f077		       a2 c0		      ldx	#192
-     57  f079				   .GameLineLoop
-     58  f079							; Render the 192 visible scanline
-     59  f079		       86 02		      stx	WSYNC
-     60  f07b		       ca		      dex
-     61  f07c		       d0 fb		      bne	.GameLineLoop
-     62  f07e
-     63  f07e							; Display vblank
-     64  f07e				   Overscan
-     65  f07e		       a9 02		      lda	#2
-     66  f080		       85 01		      sta	VBLANK
-     67  f082					      REPEAT	30
-     68  f082		       85 02		      sta	WSYNC
-     67  f082					      REPEND
-     68  f084		       85 02		      sta	WSYNC
-     67  f084					      REPEND
-     68  f086		       85 02		      sta	WSYNC
-     67  f086					      REPEND
-     68  f088		       85 02		      sta	WSYNC
-     67  f088					      REPEND
-     68  f08a		       85 02		      sta	WSYNC
-     67  f08a					      REPEND
-     68  f08c		       85 02		      sta	WSYNC
-     67  f08c					      REPEND
-     68  f08e		       85 02		      sta	WSYNC
-     67  f08e					      REPEND
-     68  f090		       85 02		      sta	WSYNC
-     67  f090					      REPEND
-     68  f092		       85 02		      sta	WSYNC
-     67  f092					      REPEND
-     68  f094		       85 02		      sta	WSYNC
-     67  f094					      REPEND
-     68  f096		       85 02		      sta	WSYNC
-     67  f096					      REPEND
-     68  f098		       85 02		      sta	WSYNC
-     67  f098					      REPEND
-     68  f09a		       85 02		      sta	WSYNC
-     67  f09a					      REPEND
-     68  f09c		       85 02		      sta	WSYNC
-     67  f09c					      REPEND
-     68  f09e		       85 02		      sta	WSYNC
-     67  f09e					      REPEND
-     68  f0a0		       85 02		      sta	WSYNC
-     67  f0a0					      REPEND
-     68  f0a2		       85 02		      sta	WSYNC
-     67  f0a2					      REPEND
-     68  f0a4		       85 02		      sta	WSYNC
-     67  f0a4					      REPEND
-     68  f0a6		       85 02		      sta	WSYNC
-     67  f0a6					      REPEND
-     68  f0a8		       85 02		      sta	WSYNC
-     67  f0a8					      REPEND
-     68  f0aa		       85 02		      sta	WSYNC
-     67  f0aa					      REPEND
-     68  f0ac		       85 02		      sta	WSYNC
-     67  f0ac					      REPEND
-     68  f0ae		       85 02		      sta	WSYNC
-     67  f0ae					      REPEND
-     68  f0b0		       85 02		      sta	WSYNC
-     67  f0b0					      REPEND
-     68  f0b2		       85 02		      sta	WSYNC
-     67  f0b2					      REPEND
-     68  f0b4		       85 02		      sta	WSYNC
-     67  f0b4					      REPEND
-     68  f0b6		       85 02		      sta	WSYNC
-     67  f0b6					      REPEND
-     68  f0b8		       85 02		      sta	WSYNC
-     67  f0b8					      REPEND
-     68  f0ba		       85 02		      sta	WSYNC
-     67  f0ba					      REPEND
-     68  f0bc		       85 02		      sta	WSYNC
-     69  f0be					      REPEND
-     70  f0be
-     71  f0be		       a9 00		      lda	#0
-     72  f0c0		       85 01		      sta	VBLANK
-     73  f0c2
-     74  f0c2							; Loop forever
-     75  f0c2		       4c 13 f0 	      jmp	StartFrame
-     76  f0c5
-     77  f0c5							; Complete ROM with 4kb
-     78  fffc					      org	$FFFC
-     79  fffc		       00 f0		      word.w	Reset
-     80  fffe		       00 f0		      word.w	Reset
+     56  f077							; Setup playfield
+     57  f077		       a9 f0		      lda	#%11110000	; PF0 uses first 4 bits and is reversed
+     58  f079		       85 0d		      sta	PF0
+     59  f07b		       a9 c0		      lda	#%11000000
+     60  f07d		       85 0e		      sta	PF1
+     61  f07f		       a9 00		      lda	#0
+     62  f081		       85 0f		      sta	PF2
+     63  f083
+     64  f083							; Playfield reflection
+     65  f083		       a9 01		      lda	#%00000001
+     66  f085		       85 0a		      sta	CTRLPF
+     67  f087
+     68  f087		       a2 c0		      ldx	#192
+     69  f089				   .GameLineLoop
+     70  f089							; Render the 192 visible scanline
+     71  f089		       86 02		      stx	WSYNC
+     72  f08b		       ca		      dex
+     73  f08c		       d0 fb		      bne	.GameLineLoop
+     74  f08e
+     75  f08e							; Display vblank
+     76  f08e				   Overscan
+     77  f08e		       a9 02		      lda	#2
+     78  f090		       85 01		      sta	VBLANK
+     79  f092					      REPEAT	30
+     80  f092		       85 02		      sta	WSYNC
+     79  f092					      REPEND
+     80  f094		       85 02		      sta	WSYNC
+     79  f094					      REPEND
+     80  f096		       85 02		      sta	WSYNC
+     79  f096					      REPEND
+     80  f098		       85 02		      sta	WSYNC
+     79  f098					      REPEND
+     80  f09a		       85 02		      sta	WSYNC
+     79  f09a					      REPEND
+     80  f09c		       85 02		      sta	WSYNC
+     79  f09c					      REPEND
+     80  f09e		       85 02		      sta	WSYNC
+     79  f09e					      REPEND
+     80  f0a0		       85 02		      sta	WSYNC
+     79  f0a0					      REPEND
+     80  f0a2		       85 02		      sta	WSYNC
+     79  f0a2					      REPEND
+     80  f0a4		       85 02		      sta	WSYNC
+     79  f0a4					      REPEND
+     80  f0a6		       85 02		      sta	WSYNC
+     79  f0a6					      REPEND
+     80  f0a8		       85 02		      sta	WSYNC
+     79  f0a8					      REPEND
+     80  f0aa		       85 02		      sta	WSYNC
+     79  f0aa					      REPEND
+     80  f0ac		       85 02		      sta	WSYNC
+     79  f0ac					      REPEND
+     80  f0ae		       85 02		      sta	WSYNC
+     79  f0ae					      REPEND
+     80  f0b0		       85 02		      sta	WSYNC
+     79  f0b0					      REPEND
+     80  f0b2		       85 02		      sta	WSYNC
+     79  f0b2					      REPEND
+     80  f0b4		       85 02		      sta	WSYNC
+     79  f0b4					      REPEND
+     80  f0b6		       85 02		      sta	WSYNC
+     79  f0b6					      REPEND
+     80  f0b8		       85 02		      sta	WSYNC
+     79  f0b8					      REPEND
+     80  f0ba		       85 02		      sta	WSYNC
+     79  f0ba					      REPEND
+     80  f0bc		       85 02		      sta	WSYNC
+     79  f0bc					      REPEND
+     80  f0be		       85 02		      sta	WSYNC
+     79  f0be					      REPEND
+     80  f0c0		       85 02		      sta	WSYNC
+     79  f0c0					      REPEND
+     80  f0c2		       85 02		      sta	WSYNC
+     79  f0c2					      REPEND
+     80  f0c4		       85 02		      sta	WSYNC
+     79  f0c4					      REPEND
+     80  f0c6		       85 02		      sta	WSYNC
+     79  f0c6					      REPEND
+     80  f0c8		       85 02		      sta	WSYNC
+     79  f0c8					      REPEND
+     80  f0ca		       85 02		      sta	WSYNC
+     79  f0ca					      REPEND
+     80  f0cc		       85 02		      sta	WSYNC
+     81  f0ce					      REPEND
+     82  f0ce
+     83  f0ce		       a9 00		      lda	#0
+     84  f0d0		       85 01		      sta	VBLANK
+     85  f0d2
+     86  f0d2							; Loop forever
+     87  f0d2		       4c 13 f0 	      jmp	StartFrame
+     88  f0d5
+     89  f0d5							; Complete ROM with 4kb
+     90  fffc					      org	$FFFC
+     91  fffc		       00 f0		      word.w	Reset
+     92  fffe		       00 f0		      word.w	Reset
