@@ -10,6 +10,13 @@ JetXPos		byte
 JetYPos		byte
 BomberXPos	byte
 BomberYPos	byte
+BallDudePtr	word
+AdrienPtr	word
+BallDudeColPtr	word
+AdrienColPtr	word
+
+; Define constants
+SPRITE_HEIGHT = 9
 
 	seg Code
 	org $F000
@@ -23,6 +30,34 @@ Reset:
 	sta JetYPos
 	lda #60
 	sta JetXPos
+	
+	; Set initial bomber coordinates
+	; Basically just some random coordinates as placeholder lol
+	lda #83
+	sta BomberYPos
+	lda #15
+	sta BomberXPos
+
+; Initialise sprite and palette pointers
+	lda #<BallDude
+	sta BallDudePtr
+	lda #>BallDude
+	sta BallDudePtr+1
+
+	lda #<Adrien
+	sta AdrienPtr
+	lda #>Adrien
+	sta AdrienPtr+1
+
+	lda #<BallDudeCol
+	sta BallDudeColPtr
+	lda #>BallDudeCol
+	sta BallDudeColPtr+1
+
+	lda #<AdrienCol
+	sta AdrienColPtr
+	lda #>AdrienCol
+	sta AdrienColPtr+1
 
 ; Begin rendering
 StartFrame:
@@ -85,6 +120,69 @@ Overscan:
 
 	; Loop forever
 	jmp StartFrame
+
+; Sprites
+BallDude:
+	.byte #%00000000
+        .byte #%00111100;$5A
+        .byte #%00111100;$5A
+        .byte #%01111110;$58
+        .byte #%11111111;$56
+        .byte #%10011111;$54
+        .byte #%11011011;$54
+        .byte #%11111011;$52
+        .byte #%01110110;$52
+BallDudeTurning:
+	.byte #%00000000
+        .byte #%00011000;$5A
+        .byte #%00111100;$58
+        .byte #%01111110;$56
+        .byte #%01111110;$54
+        .byte #%01001010;$54
+        .byte #%01101010;$52
+        .byte #%00110100;$52
+        .byte #%00011000;$52
+Adrien:
+	.byte #%00000000
+        .byte #%11111111;$16
+        .byte #%11100111;$16
+        .byte #%11100111;$18
+        .byte #%01111110;$18
+        .byte #%01011010;$1A
+        .byte #%00111100;$1A
+        .byte #%00111100;$1C
+        .byte #%00011000;$1C
+
+BallDudeCol:
+	.byte #$00
+        .byte #$5A;
+        .byte #$58;
+        .byte #$56;
+        .byte #$54;
+        .byte #$54;
+        .byte #$52;
+        .byte #$52;
+        .byte #$52;
+BallDudeTurningCol:
+	.byte #$00
+        .byte #$5A;
+        .byte #$58;
+        .byte #$56;
+        .byte #$54;
+        .byte #$54;
+        .byte #$52;
+        .byte #$52;
+        .byte #$52;
+AdrienCol:
+	.byte #$00
+        .byte #$16;
+        .byte #$16;
+        .byte #$18;
+        .byte #$18;
+        .byte #$1A;
+        .byte #$1A;
+        .byte #$1C;
+        .byte #$1C;
 
 ; Complete ROM with 4kb
 	org $FFFC
