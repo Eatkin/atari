@@ -1,374 +1,374 @@
-------- FILE bomber.asm LEVEL 1 PASS 1
-      1  0000					      processor	6502
-      2  0000 ????
-------- FILE macro.h LEVEL 2 PASS 1
-      0  0000 ????				      include	"macro.h"
-      1  0000 ????						; MACRO.H
-      2  0000 ????						; Version 1.05, 13/NOVEMBER/2003
-      3  0000 ????
-      4  0000 ????	       00 69	   VERSION_MACRO =	105
-      5  0000 ????
-      6  0000 ????						;
-      7  0000 ????						; THIS FILE IS EXPLICITLY SUPPORTED AS A DASM-PREFERRED COMPANION FILE
-      8  0000 ????						; PLEASE DO *NOT* REDISTRIBUTE MODIFIED VERSIONS OF THIS FILE!
-      9  0000 ????						;
-     10  0000 ????						; This file defines DASM macros useful for development for the Atari 2600.
-     11  0000 ????						; It is distributed as a companion machine-specific support package
-     12  0000 ????						; for the DASM compiler. Updates to this file, DASM, and associated tools are
-     13  0000 ????						; available at at http://www.atari2600.org/dasm
-     14  0000 ????						;
-     15  0000 ????						; Many thanks to the people who have contributed.  If you take issue with the
-     16  0000 ????						; contents, or would like to add something, please write to me
-     17  0000 ????						; (atari2600@taswegian.com) with your contribution.
-     18  0000 ????						;
-     19  0000 ????						; Latest Revisions...
-     20  0000 ????						;
-     21  0000 ????						; 1.05  14/NOV/2003	  - Added VERSION_MACRO equate (which will reflect 100x version #)
-     22  0000 ????						;			    This will allow conditional code to verify MACRO.H being
-     23  0000 ????						;			    used for code assembly.
-     24  0000 ????						; 1.04  13/NOV/2003	 - SET_POINTER macro added (16-bit address load)
-     25  0000 ????						;
-     26  0000 ????						; 1.03  23/JUN/2003	 - CLEAN_START macro added - clears TIA, RAM, registers
-     27  0000 ????						;
-     28  0000 ????						; 1.02  14/JUN/2003	 - VERTICAL_SYNC macro added
-     29  0000 ????						;			   (standardised macro for vertical synch code)
-     30  0000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added.
-     31  0000 ????						;			 - NO_ILLEGAL_OPCODES switch implemented
-     32  0000 ????						; 1.0	22/MAR/2003		Initial release
-     33  0000 ????
-     34  0000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage,
-     35  0000 ????						;   define the symbol NO_ILLEGAL_OPCODES (-DNO_ILLEGAL_OPCODES=1 on command-line).
-     36  0000 ????						;   If you do not allow illegal opcode usage, you must include this file
-     37  0000 ????						;   *after* including VCS.H (as the non-illegal opcodes access hardware
-     38  0000 ????						;   registers and require them to be defined first).
-     39  0000 ????
-     40  0000 ????						; Available macros...
-     41  0000 ????						;   SLEEP n		 - sleep for n cycles
-     42  0000 ????						;   VERTICAL_SYNC	 - correct 3 scanline vertical synch code
-     43  0000 ????						;   CLEAN_START	 - set machine to known state on startup
-     44  0000 ????						;   SET_POINTER	 - load a 16-bit absolute to a 16-bit variable
-     45  0000 ????
-     46  0000 ????						;-------------------------------------------------------------------------------
-     47  0000 ????						; SLEEP duration
-     48  0000 ????						; Original author: Thomas Jentzsch
-     49  0000 ????						; Inserts code which takes the specified number of cycles to execute.	This is
-     50  0000 ????						; useful for code where precise timing is required.
-     51  0000 ????						; ILLEGAL-OPCODE VERSION DOES NOT AFFECT FLAGS OR REGISTERS.
-     52  0000 ????						; LEGAL OPCODE VERSION MAY AFFECT FLAGS
-     53  0000 ????						; Uses illegal opcode (DASM 2.20.01 onwards).
-     54  0000 ????
-     55  0000 ????				      MAC	sleep
-     56  0000 ????			   .CYCLES    SET	{1}
-     57  0000 ????
-     58  0000 ????				      IF	.CYCLES < 2
-     59  0000 ????				      ECHO	"MACRO ERROR: 'SLEEP': Duration must be > 1"
-     60  0000 ????				      ERR
-     61  0000 ????				      ENDIF
-     62  0000 ????
-     63  0000 ????				      IF	.CYCLES & 1
-     64  0000 ????				      IFNCONST	NO_ILLEGAL_OPCODES
-     65  0000 ????				      nop	0
-     66  0000 ????				      ELSE
-     67  0000 ????				      bit	VSYNC
-     68  0000 ????				      ENDIF
-     69  0000 ????			   .CYCLES    SET	.CYCLES - 3
-     70  0000 ????				      ENDIF
-     71  0000 ????
-     72  0000 ????				      REPEAT	.CYCLES / 2
-     73  0000 ????				      nop
-     74  0000 ????				      REPEND
-     75  0000 ????				      ENDM		;usage: SLEEP n (n>1)
-     76  0000 ????
-     77  0000 ????						;-------------------------------------------------------------------------------
-     78  0000 ????						; VERTICAL_SYNC
-     79  0000 ????						; Original author: Manuel Polik
-     80  0000 ????						; Inserts the code required for a proper 3 scannline
-     81  0000 ????						; vertical sync sequence
-     82  0000 ????						;
-     83  0000 ????						; Note: Alters the accumulator
-     84  0000 ????						;
-     85  0000 ????						; IN:
-     86  0000 ????						; OUT: A = 1
-     87  0000 ????
-     88  0000 ????				      MAC	vertical_sync
-     89  0000 ????				      LDA	#$02	; A = VSYNC enable
-     90  0000 ????				      STA	WSYNC	; Finish current line
-     91  0000 ????				      STA	VSYNC	; Start vertical sync
-     92  0000 ????				      STA	WSYNC	; 1st line vertical sync
-     93  0000 ????				      STA	WSYNC	; 2nd line vertical sync
-     94  0000 ????				      LSR		; A = VSYNC disable
-     95  0000 ????				      STA	WSYNC	; 3rd line vertical sync
-     96  0000 ????				      STA	VSYNC	; Stop vertical sync
-     97  0000 ????				      ENDM
-     98  0000 ????
-     99  0000 ????						;-------------------------------------------------------------------------------
-    100  0000 ????						; CLEAN_START
-    101  0000 ????						; Original author: Andrew Davie
-    102  0000 ????						; Standardised start-up code, clears stack, all TIA registers and RAM to 0
-    103  0000 ????						; Sets stack pointer to $FF, and all registers to 0
-    104  0000 ????						; Sets decimal mode off, sets interrupt flag (kind of un-necessary)
-    105  0000 ????						; Use as very first section of code on boot (ie: at reset)
-    106  0000 ????						; Code written to minimise total ROM usage - uses weird 6502 knowledge :)
-    107  0000 ????
-    108  0000 ????				      MAC	clean_start
-    109  0000 ????				      sei
-    110  0000 ????				      cld
-    111  0000 ????
-    112  0000 ????				      ldx	#0
-    113  0000 ????				      txa
-    114  0000 ????				      tay
-    115  0000 ????			   .CLEAR_STACK dex
-    116  0000 ????				      txs
-    117  0000 ????				      pha
-    118  0000 ????				      bne	.CLEAR_STACK	; SP=$FF, X = A = Y = 0
-    119  0000 ????
-    120  0000 ????				      ENDM
-    121  0000 ????
-    122  0000 ????						;-------------------------------------------------------
-    123  0000 ????						; SET_POINTER
-    124  0000 ????						; Original author: Manuel Rotschkar
-    125  0000 ????						;
-    126  0000 ????						; Sets a 2 byte RAM pointer to an absolute address.
-    127  0000 ????						;
-    128  0000 ????						; Usage: SET_POINTER pointer, address
-    129  0000 ????						; Example: SET_POINTER SpritePTR, SpriteData
-    130  0000 ????						;
-    131  0000 ????						; Note: Alters the accumulator, NZ flags
-    132  0000 ????						; IN 1: 2 byte RAM location reserved for pointer
-    133  0000 ????						; IN 2: absolute address
-    134  0000 ????
-    135  0000 ????				      MAC	set_pointer
-    136  0000 ????			   .POINTER   SET	{1}
-    137  0000 ????			   .ADDRESS   SET	{2}
-    138  0000 ????
-    139  0000 ????				      LDA	#<.ADDRESS	; Get Lowbyte of Address
-    140  0000 ????				      STA	.POINTER	; Store in pointer
-    141  0000 ????				      LDA	#>.ADDRESS	; Get Hibyte of Address
-    142  0000 ????				      STA	.POINTER+1	; Store in pointer+1
-    143  0000 ????
-    144  0000 ????				      ENDM
-    145  0000 ????
-    146  0000 ????
-    147  0000 ????						;-------------------------------------------------------
-    148  0000 ????						; SAME PAGE BRANCH CHECK
-    149  0000 ????						; Original auther: John Payson
-    150  0000 ????						;
-    151  0000 ????						; Usage: sbeq, sbne, etc just like a normal beq, bne, etc.
-    152  0000 ????						;	  A message will be output if the target of the branch
-    153  0000 ????						;	  is not on the same page.
-    154  0000 ????						;
-    155  0000 ????				      mac	sbcc
-    156  0000 ????				      bcc	{1}
-    157  0000 ????				      if	(* ^ {1}) & $FF00
-    158  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    159  0000 ????				      err
-    160  0000 ????				      endif
-    161  0000 ????				      endm
-    162  0000 ????
-    163  0000 ????				      mac	sbcs
-    164  0000 ????				      bcs	{1}
-    165  0000 ????				      if	(* ^ {1}) & $FF00
-    166  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    167  0000 ????				      err
-    168  0000 ????				      endif
-    169  0000 ????				      endm
-    170  0000 ????
-    171  0000 ????				      mac	sbeq
-    172  0000 ????				      beq	{1}
-    173  0000 ????				      if	(* ^ {1}) & $FF00
-    174  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    175  0000 ????				      err
-    176  0000 ????				      endif
-    177  0000 ????				      endm
-    178  0000 ????
-    179  0000 ????				      mac	sbmi
-    180  0000 ????				      bmi	{1}
-    181  0000 ????				      if	(* ^ {1}) & $FF00
-    182  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    183  0000 ????				      err
-    184  0000 ????				      endif
-    185  0000 ????				      endm
-    186  0000 ????
-    187  0000 ????				      mac	sbne
-    188  0000 ????				      bne	{1}
-    189  0000 ????				      if	(* ^ {1}) & $FF00
-    190  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    191  0000 ????				      err
-    192  0000 ????				      endif
-    193  0000 ????				      endm
-    194  0000 ????
-    195  0000 ????				      mac	sbpl
-    196  0000 ????				      bpl	{1}
-    197  0000 ????				      if	(* ^ {1}) & $FF00
-    198  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    199  0000 ????				      err
-    200  0000 ????				      endif
-    201  0000 ????				      endm
-    202  0000 ????
-    203  0000 ????				      mac	sbvc
-    204  0000 ????				      bvc	{1}
-    205  0000 ????				      if	(* ^ {1}) & $FF00
-    206  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    207  0000 ????				      err
-    208  0000 ????				      endif
-    209  0000 ????				      endm
-    210  0000 ????
-    211  0000 ????				      mac	sbvs
-    212  0000 ????				      bvs	{1}
-    213  0000 ????				      if	(* ^ {1}) & $FF00
-    214  0000 ????				      echo	"PAGE CROSSING","WARNING ",{1}," at ",*
-    215  0000 ????				      err
-    216  0000 ????				      endif
-    217  0000 ????				      endm
-    218  0000 ????
-    219  0000 ????						;-------------------------------------------------------
-    220  0000 ????						; DIFFERENT PAGE BRANCH CHECK
-    221  0000 ????						; Original auther: Darrell Spice, Jr.
-    222  0000 ????						;
-    223  0000 ????						; Usage: dbeq, dbne, etc just like a normal beq, bne, etc.
-    224  0000 ????						;	  A message will be output if the target of the branch
-    225  0000 ????						;	  is not on a different page.
-    226  0000 ????						;
-    227  0000 ????				      mac	dbcc
-    228  0000 ????				      bcc	{1}
-    229  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    230  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    231  0000 ????				      err
-    232  0000 ????				      endif
-    233  0000 ????				      endm
-    234  0000 ????
-    235  0000 ????				      mac	dbcs
-    236  0000 ????				      bcs	{1}
-    237  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    238  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    239  0000 ????				      err
-    240  0000 ????				      endif
-    241  0000 ????				      endm
-    242  0000 ????
-    243  0000 ????				      mac	dbeq
-    244  0000 ????				      beq	{1}
-    245  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    246  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    247  0000 ????				      err
-    248  0000 ????				      endif
-    249  0000 ????				      endm
-    250  0000 ????
-    251  0000 ????				      mac	dbmi
-    252  0000 ????				      bmi	{1}
-    253  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    254  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    255  0000 ????				      err
-    256  0000 ????				      endif
-    257  0000 ????				      endm
-    258  0000 ????
-    259  0000 ????				      mac	dbne
-    260  0000 ????				      bne	{1}
-    261  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    262  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    263  0000 ????				      err
-    264  0000 ????				      endif
-    265  0000 ????				      endm
-    266  0000 ????
-    267  0000 ????				      mac	dbpl
-    268  0000 ????				      bpl	{1}
-    269  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    270  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    271  0000 ????				      err
-    272  0000 ????				      endif
-    273  0000 ????				      endm
-    274  0000 ????
-    275  0000 ????				      mac	dbvc
-    276  0000 ????				      bvc	{1}
-    277  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    278  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    279  0000 ????				      err
-    280  0000 ????				      endif
-    281  0000 ????				      endm
-    282  0000 ????
-    283  0000 ????				      mac	dbvs
-    284  0000 ????				      bvs	{1}
-    285  0000 ????				      if	((* ^ {1}) & $FF00) = 0
-    286  0000 ????				      echo	"SAME PAGE","WARNING ",{1}," at ",*
-    287  0000 ????				      err
-    288  0000 ????				      endif
-    289  0000 ????				      endm
-    290  0000 ????
-    291  0000 ????						; EOF
+------- FILE bomber.asm LEVEL 1 PASS 2
+      1  fffe					      processor	6502
+      2  10000 ????
+------- FILE macro.h LEVEL 2 PASS 2
+      0  10000 ????				       include	"macro.h"
+      1  10000 ????						; MACRO.H
+      2  10000 ????						; Version 1.05, 13/NOVEMBER/2003
+      3  10000 ????
+      4  10000 ????		00 69	    VERSION_MACRO =	105
+      5  10000 ????
+      6  10000 ????						;
+      7  10000 ????						; THIS FILE IS EXPLICITLY SUPPORTED AS A DASM-PREFERRED COMPANION FILE
+      8  10000 ????						; PLEASE DO *NOT* REDISTRIBUTE MODIFIED VERSIONS OF THIS FILE!
+      9  10000 ????						;
+     10  10000 ????						; This file defines DASM macros useful for development for the Atari 2600.
+     11  10000 ????						; It is distributed as a companion machine-specific support package
+     12  10000 ????						; for the DASM compiler. Updates to this file, DASM, and associated tools are
+     13  10000 ????						; available at at http://www.atari2600.org/dasm
+     14  10000 ????						;
+     15  10000 ????						; Many thanks to the people who have contributed.  If you take issue with the
+     16  10000 ????						; contents, or would like to add something, please write to me
+     17  10000 ????						; (atari2600@taswegian.com) with your contribution.
+     18  10000 ????						;
+     19  10000 ????						; Latest Revisions...
+     20  10000 ????						;
+     21  10000 ????						; 1.05  14/NOV/2003	  - Added VERSION_MACRO equate (which will reflect 100x version #)
+     22  10000 ????						;			    This will allow conditional code to verify MACRO.H being
+     23  10000 ????						;			    used for code assembly.
+     24  10000 ????						; 1.04  13/NOV/2003	 - SET_POINTER macro added (16-bit address load)
+     25  10000 ????						;
+     26  10000 ????						; 1.03  23/JUN/2003	 - CLEAN_START macro added - clears TIA, RAM, registers
+     27  10000 ????						;
+     28  10000 ????						; 1.02  14/JUN/2003	 - VERTICAL_SYNC macro added
+     29  10000 ????						;			   (standardised macro for vertical synch code)
+     30  10000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added.
+     31  10000 ????						;			 - NO_ILLEGAL_OPCODES switch implemented
+     32  10000 ????						; 1.0	22/MAR/2003		Initial release
+     33  10000 ????
+     34  10000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage,
+     35  10000 ????						;   define the symbol NO_ILLEGAL_OPCODES (-DNO_ILLEGAL_OPCODES=1 on command-line).
+     36  10000 ????						;   If you do not allow illegal opcode usage, you must include this file
+     37  10000 ????						;   *after* including VCS.H (as the non-illegal opcodes access hardware
+     38  10000 ????						;   registers and require them to be defined first).
+     39  10000 ????
+     40  10000 ????						; Available macros...
+     41  10000 ????						;   SLEEP n		 - sleep for n cycles
+     42  10000 ????						;   VERTICAL_SYNC	 - correct 3 scanline vertical synch code
+     43  10000 ????						;   CLEAN_START	 - set machine to known state on startup
+     44  10000 ????						;   SET_POINTER	 - load a 16-bit absolute to a 16-bit variable
+     45  10000 ????
+     46  10000 ????						;-------------------------------------------------------------------------------
+     47  10000 ????						; SLEEP duration
+     48  10000 ????						; Original author: Thomas Jentzsch
+     49  10000 ????						; Inserts code which takes the specified number of cycles to execute.	This is
+     50  10000 ????						; useful for code where precise timing is required.
+     51  10000 ????						; ILLEGAL-OPCODE VERSION DOES NOT AFFECT FLAGS OR REGISTERS.
+     52  10000 ????						; LEGAL OPCODE VERSION MAY AFFECT FLAGS
+     53  10000 ????						; Uses illegal opcode (DASM 2.20.01 onwards).
+     54  10000 ????
+     55  10000 ????				       MAC	sleep
+     56  10000 ????			    .CYCLES    SET	{1}
+     57  10000 ????
+     58  10000 ????				       IF	.CYCLES < 2
+     59  10000 ????				       ECHO	"MACRO ERROR: 'SLEEP': Duration must be > 1"
+     60  10000 ????				       ERR
+     61  10000 ????				       ENDIF
+     62  10000 ????
+     63  10000 ????				       IF	.CYCLES & 1
+     64  10000 ????				       IFNCONST	NO_ILLEGAL_OPCODES
+     65  10000 ????				       nop	0
+     66  10000 ????				       ELSE
+     67  10000 ????				       bit	VSYNC
+     68  10000 ????				       ENDIF
+     69  10000 ????			    .CYCLES    SET	.CYCLES - 3
+     70  10000 ????				       ENDIF
+     71  10000 ????
+     72  10000 ????				       REPEAT	.CYCLES / 2
+     73  10000 ????				       nop
+     74  10000 ????				       REPEND
+     75  10000 ????				       ENDM		;usage: SLEEP n (n>1)
+     76  10000 ????
+     77  10000 ????						;-------------------------------------------------------------------------------
+     78  10000 ????						; VERTICAL_SYNC
+     79  10000 ????						; Original author: Manuel Polik
+     80  10000 ????						; Inserts the code required for a proper 3 scannline
+     81  10000 ????						; vertical sync sequence
+     82  10000 ????						;
+     83  10000 ????						; Note: Alters the accumulator
+     84  10000 ????						;
+     85  10000 ????						; IN:
+     86  10000 ????						; OUT: A = 1
+     87  10000 ????
+     88  10000 ????				       MAC	vertical_sync
+     89  10000 ????				       LDA	#$02	; A = VSYNC enable
+     90  10000 ????				       STA	WSYNC	; Finish current line
+     91  10000 ????				       STA	VSYNC	; Start vertical sync
+     92  10000 ????				       STA	WSYNC	; 1st line vertical sync
+     93  10000 ????				       STA	WSYNC	; 2nd line vertical sync
+     94  10000 ????				       LSR		; A = VSYNC disable
+     95  10000 ????				       STA	WSYNC	; 3rd line vertical sync
+     96  10000 ????				       STA	VSYNC	; Stop vertical sync
+     97  10000 ????				       ENDM
+     98  10000 ????
+     99  10000 ????						;-------------------------------------------------------------------------------
+    100  10000 ????						; CLEAN_START
+    101  10000 ????						; Original author: Andrew Davie
+    102  10000 ????						; Standardised start-up code, clears stack, all TIA registers and RAM to 0
+    103  10000 ????						; Sets stack pointer to $FF, and all registers to 0
+    104  10000 ????						; Sets decimal mode off, sets interrupt flag (kind of un-necessary)
+    105  10000 ????						; Use as very first section of code on boot (ie: at reset)
+    106  10000 ????						; Code written to minimise total ROM usage - uses weird 6502 knowledge :)
+    107  10000 ????
+    108  10000 ????				       MAC	clean_start
+    109  10000 ????				       sei
+    110  10000 ????				       cld
+    111  10000 ????
+    112  10000 ????				       ldx	#0
+    113  10000 ????				       txa
+    114  10000 ????				       tay
+    115  10000 ????			    .CLEAR_STACK dex
+    116  10000 ????				       txs
+    117  10000 ????				       pha
+    118  10000 ????				       bne	.CLEAR_STACK	; SP=$FF, X = A = Y = 0
+    119  10000 ????
+    120  10000 ????				       ENDM
+    121  10000 ????
+    122  10000 ????						;-------------------------------------------------------
+    123  10000 ????						; SET_POINTER
+    124  10000 ????						; Original author: Manuel Rotschkar
+    125  10000 ????						;
+    126  10000 ????						; Sets a 2 byte RAM pointer to an absolute address.
+    127  10000 ????						;
+    128  10000 ????						; Usage: SET_POINTER pointer, address
+    129  10000 ????						; Example: SET_POINTER SpritePTR, SpriteData
+    130  10000 ????						;
+    131  10000 ????						; Note: Alters the accumulator, NZ flags
+    132  10000 ????						; IN 1: 2 byte RAM location reserved for pointer
+    133  10000 ????						; IN 2: absolute address
+    134  10000 ????
+    135  10000 ????				       MAC	set_pointer
+    136  10000 ????			    .POINTER   SET	{1}
+    137  10000 ????			    .ADDRESS   SET	{2}
+    138  10000 ????
+    139  10000 ????				       LDA	#<.ADDRESS	; Get Lowbyte of Address
+    140  10000 ????				       STA	.POINTER	; Store in pointer
+    141  10000 ????				       LDA	#>.ADDRESS	; Get Hibyte of Address
+    142  10000 ????				       STA	.POINTER+1	; Store in pointer+1
+    143  10000 ????
+    144  10000 ????				       ENDM
+    145  10000 ????
+    146  10000 ????
+    147  10000 ????						;-------------------------------------------------------
+    148  10000 ????						; SAME PAGE BRANCH CHECK
+    149  10000 ????						; Original auther: John Payson
+    150  10000 ????						;
+    151  10000 ????						; Usage: sbeq, sbne, etc just like a normal beq, bne, etc.
+    152  10000 ????						;	  A message will be output if the target of the branch
+    153  10000 ????						;	  is not on the same page.
+    154  10000 ????						;
+    155  10000 ????				       mac	sbcc
+    156  10000 ????				       bcc	{1}
+    157  10000 ????				       if	(* ^ {1}) & $FF00
+    158  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    159  10000 ????				       err
+    160  10000 ????				       endif
+    161  10000 ????				       endm
+    162  10000 ????
+    163  10000 ????				       mac	sbcs
+    164  10000 ????				       bcs	{1}
+    165  10000 ????				       if	(* ^ {1}) & $FF00
+    166  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    167  10000 ????				       err
+    168  10000 ????				       endif
+    169  10000 ????				       endm
+    170  10000 ????
+    171  10000 ????				       mac	sbeq
+    172  10000 ????				       beq	{1}
+    173  10000 ????				       if	(* ^ {1}) & $FF00
+    174  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    175  10000 ????				       err
+    176  10000 ????				       endif
+    177  10000 ????				       endm
+    178  10000 ????
+    179  10000 ????				       mac	sbmi
+    180  10000 ????				       bmi	{1}
+    181  10000 ????				       if	(* ^ {1}) & $FF00
+    182  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    183  10000 ????				       err
+    184  10000 ????				       endif
+    185  10000 ????				       endm
+    186  10000 ????
+    187  10000 ????				       mac	sbne
+    188  10000 ????				       bne	{1}
+    189  10000 ????				       if	(* ^ {1}) & $FF00
+    190  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    191  10000 ????				       err
+    192  10000 ????				       endif
+    193  10000 ????				       endm
+    194  10000 ????
+    195  10000 ????				       mac	sbpl
+    196  10000 ????				       bpl	{1}
+    197  10000 ????				       if	(* ^ {1}) & $FF00
+    198  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    199  10000 ????				       err
+    200  10000 ????				       endif
+    201  10000 ????				       endm
+    202  10000 ????
+    203  10000 ????				       mac	sbvc
+    204  10000 ????				       bvc	{1}
+    205  10000 ????				       if	(* ^ {1}) & $FF00
+    206  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    207  10000 ????				       err
+    208  10000 ????				       endif
+    209  10000 ????				       endm
+    210  10000 ????
+    211  10000 ????				       mac	sbvs
+    212  10000 ????				       bvs	{1}
+    213  10000 ????				       if	(* ^ {1}) & $FF00
+    214  10000 ????				       echo	"PAGE CROSSING","WARNING ",{1}," at ",*
+    215  10000 ????				       err
+    216  10000 ????				       endif
+    217  10000 ????				       endm
+    218  10000 ????
+    219  10000 ????						;-------------------------------------------------------
+    220  10000 ????						; DIFFERENT PAGE BRANCH CHECK
+    221  10000 ????						; Original auther: Darrell Spice, Jr.
+    222  10000 ????						;
+    223  10000 ????						; Usage: dbeq, dbne, etc just like a normal beq, bne, etc.
+    224  10000 ????						;	  A message will be output if the target of the branch
+    225  10000 ????						;	  is not on a different page.
+    226  10000 ????						;
+    227  10000 ????				       mac	dbcc
+    228  10000 ????				       bcc	{1}
+    229  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    230  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    231  10000 ????				       err
+    232  10000 ????				       endif
+    233  10000 ????				       endm
+    234  10000 ????
+    235  10000 ????				       mac	dbcs
+    236  10000 ????				       bcs	{1}
+    237  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    238  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    239  10000 ????				       err
+    240  10000 ????				       endif
+    241  10000 ????				       endm
+    242  10000 ????
+    243  10000 ????				       mac	dbeq
+    244  10000 ????				       beq	{1}
+    245  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    246  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    247  10000 ????				       err
+    248  10000 ????				       endif
+    249  10000 ????				       endm
+    250  10000 ????
+    251  10000 ????				       mac	dbmi
+    252  10000 ????				       bmi	{1}
+    253  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    254  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    255  10000 ????				       err
+    256  10000 ????				       endif
+    257  10000 ????				       endm
+    258  10000 ????
+    259  10000 ????				       mac	dbne
+    260  10000 ????				       bne	{1}
+    261  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    262  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    263  10000 ????				       err
+    264  10000 ????				       endif
+    265  10000 ????				       endm
+    266  10000 ????
+    267  10000 ????				       mac	dbpl
+    268  10000 ????				       bpl	{1}
+    269  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    270  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    271  10000 ????				       err
+    272  10000 ????				       endif
+    273  10000 ????				       endm
+    274  10000 ????
+    275  10000 ????				       mac	dbvc
+    276  10000 ????				       bvc	{1}
+    277  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    278  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    279  10000 ????				       err
+    280  10000 ????				       endif
+    281  10000 ????				       endm
+    282  10000 ????
+    283  10000 ????				       mac	dbvs
+    284  10000 ????				       bvs	{1}
+    285  10000 ????				       if	((* ^ {1}) & $FF00) = 0
+    286  10000 ????				       echo	"SAME PAGE","WARNING ",{1}," at ",*
+    287  10000 ????				       err
+    288  10000 ????				       endif
+    289  10000 ????				       endm
+    290  10000 ????
+    291  10000 ????						; EOF
 ------- FILE bomber.asm
-------- FILE vcs.h LEVEL 2 PASS 1
-      0  0000 ????				      include	"vcs.h"
-      1  0000 ????						; VCS.H
-      2  0000 ????						; Version 1.05, 13/November/2003
-      3  0000 ????
-      4  0000 ????	       00 69	   VERSION_VCS =	105
-      5  0000 ????
-      6  0000 ????						; THIS IS A PRELIMINARY RELEASE OF *THE* "STANDARD" VCS.H
-      7  0000 ????						; THIS FILE IS EXPLICITLY SUPPORTED AS A DASM-PREFERRED COMPANION FILE
-      8  0000 ????						; PLEASE DO *NOT* REDISTRIBUTE THIS FILE!
-      9  0000 ????						;
-     10  0000 ????						; This file defines hardware registers and memory mapping for the
-     11  0000 ????						; Atari 2600. It is distributed as a companion machine-specific support package
-     12  0000 ????						; for the DASM compiler. Updates to this file, DASM, and associated tools are
-     13  0000 ????						; available at at http://www.atari2600.org/dasm
-     14  0000 ????						;
-     15  0000 ????						; Many thanks to the original author(s) of this file, and to everyone who has
-     16  0000 ????						; contributed to understanding the Atari 2600.  If you take issue with the
-     17  0000 ????						; contents, or naming of registers, please write to me (atari2600@taswegian.com)
-     18  0000 ????						; with your views.  Please contribute, if you think you can improve this
-     19  0000 ????						; file!
-     20  0000 ????						;
-     21  0000 ????						; Latest Revisions...
-     22  0000 ????						; 1.05  13/NOV/2003	  - Correction to 1.04 - now functions as requested by MR.
-     23  0000 ????						;			  - Added VERSION_VCS equate (which will reflect 100x version #)
-     24  0000 ????						;			    This will allow conditional code to verify VCS.H being
-     25  0000 ????						;			    used for code assembly.
-     26  0000 ????						; 1.04  12/NOV/2003	 Added TIA_BASE_WRITE_ADDRESS and TIA_BASE_READ_ADDRESS for
-     27  0000 ????						;			 convenient disassembly/reassembly compatibility for hardware
-     28  0000 ????						;			 mirrored reading/writing differences.	This is more a
-     29  0000 ????						;			 readability issue, and binary compatibility with disassembled
-     30  0000 ????						;			 and reassembled sources.  Per Manuel Rotschkar's suggestion.
-     31  0000 ????						; 1.03  12/MAY/2003	 Added SEG segment at end of file to fix old-code compatibility
-     32  0000 ????						;			 which was broken by the use of segments in this file, as
-     33  0000 ????						;			 reported by Manuel Polik on [stella] 11/MAY/2003
-     34  0000 ????						; 1.02  22/MAR/2003	 Added TIMINT($285)
-     35  0000 ????						; 1.01				Constant offset added to allow use for 3F-style bankswitching
-     36  0000 ????						;						 - define TIA_BASE_ADDRESS as $40 for Tigervision carts, otherwise
-     37  0000 ????						;						   it is safe to leave it undefined, and the base address will
-     38  0000 ????						;						   be set to 0.  Thanks to Eckhard Stolberg for the suggestion.
-     39  0000 ????						;			    Note, may use -DLABEL=EXPRESSION to define TIA_BASE_ADDRESS
-     40  0000 ????						;			  - register definitions are now generated through assignment
-     41  0000 ????						;			    in uninitialised segments.	This allows a changeable base
-     42  0000 ????						;			    address architecture.
-     43  0000 ????						; 1.0	22/MAR/2003		Initial release
-     44  0000 ????						;-------------------------------------------------------------------------------
-     45  0000 ????						; TIA_BASE_ADDRESS
-     46  0000 ????						; The TIA_BASE_ADDRESS defines the base address of access to TIA registers.
-     47  0000 ????						; Normally 0, the base address should (externally, before including this file)
-     48  0000 ????						; be set to $40 when creating 3F-bankswitched (and other?) cartridges.
-     49  0000 ????						; The reason is that this bankswitching scheme treats any access to locations
-     50  0000 ????						; < $40 as a bankswitch.
-     51  0000 ????				      IFNCONST	TIA_BASE_ADDRESS
-     52  0000 ????	       00 00	   TIA_BASE_ADDRESS =	0
-     53  0000 ????				      ENDIF
-     54  0000 ????						; Note: The address may be defined on the command-line using the -D switch, eg:
-     55  0000 ????						; dasm.exe code.asm -DTIA_BASE_ADDRESS=$40 -f3 -v5 -ocode.bin
-     56  0000 ????						; *OR* by declaring the label before including this file, eg:
-     57  0000 ????						; TIA_BASE_ADDRESS = $40
-     58  0000 ????						;   include "vcs.h"
-     59  0000 ????						; Alternate read/write address capability - allows for some disassembly compatibility
-     60  0000 ????						; usage ; to allow reassembly to binary perfect copies).  This is essentially catering
-     61  0000 ????						; for the mirrored ROM hardware registers.
-     62  0000 ????						; Usage: As per above, define the TIA_BASE_READ_ADDRESS and/or TIA_BASE_WRITE_ADDRESS
-     63  0000 ????						; using the -D command-line switch, as required.  If the addresses are not defined,
-     64  0000 ????						; they defaut to the TIA_BASE_ADDRESS.
-     65  0000 ????				      IFNCONST	TIA_BASE_READ_ADDRESS
-     66  0000 ????	       00 00	   TIA_BASE_READ_ADDRESS =	TIA_BASE_ADDRESS
-     67  0000 ????				      ENDIF
-     68  0000 ????				      IFNCONST	TIA_BASE_WRITE_ADDRESS
-     69  0000 ????	       00 00	   TIA_BASE_WRITE_ADDRESS =	TIA_BASE_ADDRESS
-     70  0000 ????				      ENDIF
-     71  0000 ????						;-------------------------------------------------------------------------------
-     72 U0000 ????				      SEG.U	TIA_REGISTERS_WRITE
+------- FILE vcs.h LEVEL 2 PASS 2
+      0  10000 ????				       include	"vcs.h"
+      1  10000 ????						; VCS.H
+      2  10000 ????						; Version 1.05, 13/November/2003
+      3  10000 ????
+      4  10000 ????		00 69	    VERSION_VCS =	105
+      5  10000 ????
+      6  10000 ????						; THIS IS A PRELIMINARY RELEASE OF *THE* "STANDARD" VCS.H
+      7  10000 ????						; THIS FILE IS EXPLICITLY SUPPORTED AS A DASM-PREFERRED COMPANION FILE
+      8  10000 ????						; PLEASE DO *NOT* REDISTRIBUTE THIS FILE!
+      9  10000 ????						;
+     10  10000 ????						; This file defines hardware registers and memory mapping for the
+     11  10000 ????						; Atari 2600. It is distributed as a companion machine-specific support package
+     12  10000 ????						; for the DASM compiler. Updates to this file, DASM, and associated tools are
+     13  10000 ????						; available at at http://www.atari2600.org/dasm
+     14  10000 ????						;
+     15  10000 ????						; Many thanks to the original author(s) of this file, and to everyone who has
+     16  10000 ????						; contributed to understanding the Atari 2600.  If you take issue with the
+     17  10000 ????						; contents, or naming of registers, please write to me (atari2600@taswegian.com)
+     18  10000 ????						; with your views.  Please contribute, if you think you can improve this
+     19  10000 ????						; file!
+     20  10000 ????						;
+     21  10000 ????						; Latest Revisions...
+     22  10000 ????						; 1.05  13/NOV/2003	  - Correction to 1.04 - now functions as requested by MR.
+     23  10000 ????						;			  - Added VERSION_VCS equate (which will reflect 100x version #)
+     24  10000 ????						;			    This will allow conditional code to verify VCS.H being
+     25  10000 ????						;			    used for code assembly.
+     26  10000 ????						; 1.04  12/NOV/2003	 Added TIA_BASE_WRITE_ADDRESS and TIA_BASE_READ_ADDRESS for
+     27  10000 ????						;			 convenient disassembly/reassembly compatibility for hardware
+     28  10000 ????						;			 mirrored reading/writing differences.	This is more a
+     29  10000 ????						;			 readability issue, and binary compatibility with disassembled
+     30  10000 ????						;			 and reassembled sources.  Per Manuel Rotschkar's suggestion.
+     31  10000 ????						; 1.03  12/MAY/2003	 Added SEG segment at end of file to fix old-code compatibility
+     32  10000 ????						;			 which was broken by the use of segments in this file, as
+     33  10000 ????						;			 reported by Manuel Polik on [stella] 11/MAY/2003
+     34  10000 ????						; 1.02  22/MAR/2003	 Added TIMINT($285)
+     35  10000 ????						; 1.01				Constant offset added to allow use for 3F-style bankswitching
+     36  10000 ????						;						 - define TIA_BASE_ADDRESS as $40 for Tigervision carts, otherwise
+     37  10000 ????						;						   it is safe to leave it undefined, and the base address will
+     38  10000 ????						;						   be set to 0.  Thanks to Eckhard Stolberg for the suggestion.
+     39  10000 ????						;			    Note, may use -DLABEL=EXPRESSION to define TIA_BASE_ADDRESS
+     40  10000 ????						;			  - register definitions are now generated through assignment
+     41  10000 ????						;			    in uninitialised segments.	This allows a changeable base
+     42  10000 ????						;			    address architecture.
+     43  10000 ????						; 1.0	22/MAR/2003		Initial release
+     44  10000 ????						;-------------------------------------------------------------------------------
+     45  10000 ????						; TIA_BASE_ADDRESS
+     46  10000 ????						; The TIA_BASE_ADDRESS defines the base address of access to TIA registers.
+     47  10000 ????						; Normally 0, the base address should (externally, before including this file)
+     48  10000 ????						; be set to $40 when creating 3F-bankswitched (and other?) cartridges.
+     49  10000 ????						; The reason is that this bankswitching scheme treats any access to locations
+     50  10000 ????						; < $40 as a bankswitch.
+     51  10000 ????			   -	       IFNCONST	TIA_BASE_ADDRESS
+     52  10000 ????			   -TIA_BASE_ADDRESS =	0
+     53  10000 ????				       ENDIF
+     54  10000 ????						; Note: The address may be defined on the command-line using the -D switch, eg:
+     55  10000 ????						; dasm.exe code.asm -DTIA_BASE_ADDRESS=$40 -f3 -v5 -ocode.bin
+     56  10000 ????						; *OR* by declaring the label before including this file, eg:
+     57  10000 ????						; TIA_BASE_ADDRESS = $40
+     58  10000 ????						;   include "vcs.h"
+     59  10000 ????						; Alternate read/write address capability - allows for some disassembly compatibility
+     60  10000 ????						; usage ; to allow reassembly to binary perfect copies).  This is essentially catering
+     61  10000 ????						; for the mirrored ROM hardware registers.
+     62  10000 ????						; Usage: As per above, define the TIA_BASE_READ_ADDRESS and/or TIA_BASE_WRITE_ADDRESS
+     63  10000 ????						; using the -D command-line switch, as required.  If the addresses are not defined,
+     64  10000 ????						; they defaut to the TIA_BASE_ADDRESS.
+     65  10000 ????			   -	       IFNCONST	TIA_BASE_READ_ADDRESS
+     66  10000 ????			   -TIA_BASE_READ_ADDRESS =	TIA_BASE_ADDRESS
+     67  10000 ????				       ENDIF
+     68  10000 ????			   -	       IFNCONST	TIA_BASE_WRITE_ADDRESS
+     69  10000 ????			   -TIA_BASE_WRITE_ADDRESS =	TIA_BASE_ADDRESS
+     70  10000 ????				       ENDIF
+     71  10000 ????						;-------------------------------------------------------------------------------
+     72 U002d ????				      SEG.U	TIA_REGISTERS_WRITE
      73 U0000					      ORG	TIA_BASE_WRITE_ADDRESS
      74 U0000							; DO NOT CHANGE THE RELATIVE ORDERING OF REGISTERS!
      75 U0000		       00	   VSYNC      ds	1	; $00	 0000 00x0   Vertical Sync Set-Clear
@@ -417,7 +417,7 @@
     118 U002b		       00	   HMCLR      ds	1	; $2B	 ---- ----   Clear Horizontal Move Registers
     119 U002c		       00	   CXCLR      ds	1	; $2C	 ---- ----   Clear Collision Latches
     120 U002d							;-------------------------------------------------------------------------------
-    121 U0000 ????				      SEG.U	TIA_REGISTERS_READ
+    121 U000e ????				      SEG.U	TIA_REGISTERS_READ
     122 U0000					      ORG	TIA_BASE_READ_ADDRESS
     123 U0000							;											bit 7	 bit 6
     124 U0000		       00	   CXM0P      ds	1	; $00	     xx00 0000	     Read Collision  M0-P1   M0-P0
@@ -435,7 +435,7 @@
     136 U000c		       00	   INPT4      ds	1	; $0C		x000 0000	 Read Input (Trigger) 0
     137 U000d		       00	   INPT5      ds	1	; $0D		x000 0000	 Read Input (Trigger) 1
     138 U000e							;-------------------------------------------------------------------------------
-    139 U0000 ????				      SEG.U	RIOT
+    139 U0298 ????				      SEG.U	RIOT
     140 U0280					      ORG	$280
     141 U0280							; RIOT MEMORY MAP
     142 U0280		       00	   SWCHA      ds	1	; $280      Port A data register for joysticks:
@@ -471,18 +471,25 @@
     172  0000 ????						; EOF
 ------- FILE bomber.asm
       5  0000 ????
-      6 U0000 ????				      seg.u	Variables
+      6 U008c ????				      seg.u	Variables
       7 U0080					      org	$80
       8 U0080
       9 U0080		       00	   JetXPos    byte.b
      10 U0081		       00	   JetYPos    byte.b
      11 U0082		       00	   BomberXPos byte.b
      12 U0083		       00	   BomberYPos byte.b
-     13 U0084
-     14  0000 ????				      seg	Code
-     15  f000					      org	$F000
-     16  f000
-     17  f000				   Reset
+     13 U0084		       00 00	   BallDudePtr word.w
+     14 U0086		       00 00	   AdrienPtr  word.w
+     15 U0088		       00 00	   BallDudeColPtr word.w
+     16 U008a		       00 00	   AdrienColPtr word.w
+     17 U008c
+     18 U008c							; Define constants
+     19 U008c		       00 09	   SPRITE_HEIGHT =	9
+     20 U008c
+     21  10000 ????				       seg	Code
+     22  f000					      org	$F000
+     23  f000
+     24  f000				   Reset
       0  f000					      CLEAN_START
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -495,211 +502,302 @@
       9  f008		       48		      pha
      10  f009		       d0 fb		      bne	.CLEAR_STACK
      11  f00b
-     19  f00b
-     20  f00b							; Initialise RAM variables and TIA registers
-     21  f00b							; Set initial player coordinates
-     22  f00b		       a9 0a		      lda	#10
-     23  f00d		       85 81		      sta	JetYPos
-     24  f00f		       a9 3c		      lda	#60
-     25  f011		       85 80		      sta	JetXPos
-     26  f013
-     27  f013							; Begin rendering
-     28  f013				   StartFrame
-     29  f013							; Turn on vblank and vsync
-     30  f013		       a2 02		      ldx	#2
-     31  f015		       86 01		      stx	VBLANK
-     32  f017		       86 00		      stx	VSYNC
-     33  f019					      REPEAT	3
-     34  f019		       86 02		      stx	WSYNC
-     33  f019					      REPEND
-     34  f01b		       86 02		      stx	WSYNC
-     33  f01b					      REPEND
-     34  f01d		       86 02		      stx	WSYNC
-     35  f01f					      REPEND
-     36  f01f							; Turn off vsync
-     37  f01f		       a2 00		      ldx	#0
-     38  f021		       86 00		      stx	VSYNC
-     39  f023
-     40  f023							; Render VBLANK
-     41  f023					      REPEAT	37
-     42  f023		       86 02		      stx	WSYNC
-     41  f023					      REPEND
-     42  f025		       86 02		      stx	WSYNC
-     41  f025					      REPEND
-     42  f027		       86 02		      stx	WSYNC
-     41  f027					      REPEND
-     42  f029		       86 02		      stx	WSYNC
-     41  f029					      REPEND
-     42  f02b		       86 02		      stx	WSYNC
-     41  f02b					      REPEND
-     42  f02d		       86 02		      stx	WSYNC
-     41  f02d					      REPEND
-     42  f02f		       86 02		      stx	WSYNC
-     41  f02f					      REPEND
-     42  f031		       86 02		      stx	WSYNC
-     41  f031					      REPEND
-     42  f033		       86 02		      stx	WSYNC
-     41  f033					      REPEND
-     42  f035		       86 02		      stx	WSYNC
-     41  f035					      REPEND
-     42  f037		       86 02		      stx	WSYNC
-     41  f037					      REPEND
-     42  f039		       86 02		      stx	WSYNC
-     41  f039					      REPEND
-     42  f03b		       86 02		      stx	WSYNC
-     41  f03b					      REPEND
-     42  f03d		       86 02		      stx	WSYNC
-     41  f03d					      REPEND
-     42  f03f		       86 02		      stx	WSYNC
-     41  f03f					      REPEND
-     42  f041		       86 02		      stx	WSYNC
-     41  f041					      REPEND
-     42  f043		       86 02		      stx	WSYNC
-     41  f043					      REPEND
-     42  f045		       86 02		      stx	WSYNC
-     41  f045					      REPEND
-     42  f047		       86 02		      stx	WSYNC
-     41  f047					      REPEND
-     42  f049		       86 02		      stx	WSYNC
-     41  f049					      REPEND
-     42  f04b		       86 02		      stx	WSYNC
-     41  f04b					      REPEND
-     42  f04d		       86 02		      stx	WSYNC
-     41  f04d					      REPEND
-     42  f04f		       86 02		      stx	WSYNC
-     41  f04f					      REPEND
-     42  f051		       86 02		      stx	WSYNC
-     41  f051					      REPEND
-     42  f053		       86 02		      stx	WSYNC
-     41  f053					      REPEND
-     42  f055		       86 02		      stx	WSYNC
-     41  f055					      REPEND
-     42  f057		       86 02		      stx	WSYNC
-     41  f057					      REPEND
-     42  f059		       86 02		      stx	WSYNC
-     41  f059					      REPEND
-     42  f05b		       86 02		      stx	WSYNC
-     41  f05b					      REPEND
-     42  f05d		       86 02		      stx	WSYNC
-     41  f05d					      REPEND
-     42  f05f		       86 02		      stx	WSYNC
-     41  f05f					      REPEND
-     42  f061		       86 02		      stx	WSYNC
-     41  f061					      REPEND
-     42  f063		       86 02		      stx	WSYNC
-     41  f063					      REPEND
-     42  f065		       86 02		      stx	WSYNC
-     41  f065					      REPEND
-     42  f067		       86 02		      stx	WSYNC
-     41  f067					      REPEND
-     42  f069		       86 02		      stx	WSYNC
-     41  f069					      REPEND
-     42  f06b		       86 02		      stx	WSYNC
-     43  f06d					      REPEND
-     44  f06d							; Turn off VBLANK
-     45  f06d		       86 01		      stx	VBLANK
-     46  f06f
-     47  f06f							; Render the visible scanlines
-     48  f06f				   VisibleScanlines
-     49  f06f							; Set background colour
-     50  f06f		       a9 84		      lda	#$84	; Blue
-     51  f071		       85 09		      sta	COLUBK
-     52  f073							; Set playfield colour
-     53  f073		       a9 c2		      lda	#$C2
-     54  f075		       85 08		      sta	COLUPF
-     55  f077
-     56  f077							; Setup playfield
-     57  f077		       a9 f0		      lda	#%11110000	; PF0 uses first 4 bits and is reversed
-     58  f079		       85 0d		      sta	PF0
-     59  f07b		       a9 c0		      lda	#%11000000
-     60  f07d		       85 0e		      sta	PF1
-     61  f07f		       a9 00		      lda	#0
-     62  f081		       85 0f		      sta	PF2
-     63  f083
-     64  f083							; Playfield reflection
-     65  f083		       a9 01		      lda	#%00000001
-     66  f085		       85 0a		      sta	CTRLPF
-     67  f087
-     68  f087		       a2 c0		      ldx	#192
-     69  f089				   .GameLineLoop
-     70  f089							; Render the 192 visible scanline
-     71  f089		       86 02		      stx	WSYNC
-     72  f08b		       ca		      dex
-     73  f08c		       d0 fb		      bne	.GameLineLoop
-     74  f08e
-     75  f08e							; Display vblank
-     76  f08e				   Overscan
-     77  f08e		       a9 02		      lda	#2
-     78  f090		       85 01		      sta	VBLANK
-     79  f092					      REPEAT	30
-     80  f092		       85 02		      sta	WSYNC
-     79  f092					      REPEND
-     80  f094		       85 02		      sta	WSYNC
-     79  f094					      REPEND
-     80  f096		       85 02		      sta	WSYNC
-     79  f096					      REPEND
-     80  f098		       85 02		      sta	WSYNC
-     79  f098					      REPEND
-     80  f09a		       85 02		      sta	WSYNC
-     79  f09a					      REPEND
-     80  f09c		       85 02		      sta	WSYNC
-     79  f09c					      REPEND
-     80  f09e		       85 02		      sta	WSYNC
-     79  f09e					      REPEND
-     80  f0a0		       85 02		      sta	WSYNC
-     79  f0a0					      REPEND
-     80  f0a2		       85 02		      sta	WSYNC
-     79  f0a2					      REPEND
-     80  f0a4		       85 02		      sta	WSYNC
-     79  f0a4					      REPEND
-     80  f0a6		       85 02		      sta	WSYNC
-     79  f0a6					      REPEND
-     80  f0a8		       85 02		      sta	WSYNC
-     79  f0a8					      REPEND
-     80  f0aa		       85 02		      sta	WSYNC
-     79  f0aa					      REPEND
-     80  f0ac		       85 02		      sta	WSYNC
-     79  f0ac					      REPEND
-     80  f0ae		       85 02		      sta	WSYNC
-     79  f0ae					      REPEND
-     80  f0b0		       85 02		      sta	WSYNC
-     79  f0b0					      REPEND
-     80  f0b2		       85 02		      sta	WSYNC
-     79  f0b2					      REPEND
-     80  f0b4		       85 02		      sta	WSYNC
-     79  f0b4					      REPEND
-     80  f0b6		       85 02		      sta	WSYNC
-     79  f0b6					      REPEND
-     80  f0b8		       85 02		      sta	WSYNC
-     79  f0b8					      REPEND
-     80  f0ba		       85 02		      sta	WSYNC
-     79  f0ba					      REPEND
-     80  f0bc		       85 02		      sta	WSYNC
-     79  f0bc					      REPEND
-     80  f0be		       85 02		      sta	WSYNC
-     79  f0be					      REPEND
-     80  f0c0		       85 02		      sta	WSYNC
-     79  f0c0					      REPEND
-     80  f0c2		       85 02		      sta	WSYNC
-     79  f0c2					      REPEND
-     80  f0c4		       85 02		      sta	WSYNC
-     79  f0c4					      REPEND
-     80  f0c6		       85 02		      sta	WSYNC
-     79  f0c6					      REPEND
-     80  f0c8		       85 02		      sta	WSYNC
-     79  f0c8					      REPEND
-     80  f0ca		       85 02		      sta	WSYNC
-     79  f0ca					      REPEND
-     80  f0cc		       85 02		      sta	WSYNC
-     81  f0ce					      REPEND
-     82  f0ce
-     83  f0ce		       a9 00		      lda	#0
-     84  f0d0		       85 01		      sta	VBLANK
-     85  f0d2
-     86  f0d2							; Loop forever
-     87  f0d2		       4c 13 f0 	      jmp	StartFrame
-     88  f0d5
-     89  f0d5							; Complete ROM with 4kb
-     90  fffc					      org	$FFFC
-     91  fffc		       00 f0		      word.w	Reset
-     92  fffe		       00 f0		      word.w	Reset
+     26  f00b
+     27  f00b							; Initialise RAM variables and TIA registers
+     28  f00b							; Set initial player coordinates
+     29  f00b		       a9 0a		      lda	#10
+     30  f00d		       85 81		      sta	JetYPos
+     31  f00f		       a9 3c		      lda	#60
+     32  f011		       85 80		      sta	JetXPos
+     33  f013
+     34  f013							; Set initial bomber coordinates
+     35  f013							; Basically just some random coordinates as placeholder lol
+     36  f013		       a9 53		      lda	#83
+     37  f015		       85 83		      sta	BomberYPos
+     38  f017		       a9 0f		      lda	#15
+     39  f019		       85 82		      sta	BomberXPos
+     40  f01b
+     41  f01b							; Initialise sprite and palette pointers
+     42  f01b		       a9 fd		      lda	#<BallDude
+     43  f01d		       85 84		      sta	BallDudePtr
+     44  f01f		       a9 f0		      lda	#>BallDude
+     45  f021		       85 85		      sta	BallDudePtr+1
+     46  f023
+     47  f023		       a9 0f		      lda	#<Adrien
+     48  f025		       85 86		      sta	AdrienPtr
+     49  f027		       a9 f1		      lda	#>Adrien
+     50  f029		       85 87		      sta	AdrienPtr+1
+     51  f02b
+     52  f02b		       a9 18		      lda	#<BallDudeCol
+     53  f02d		       85 88		      sta	BallDudeColPtr
+     54  f02f		       a9 f1		      lda	#>BallDudeCol
+     55  f031		       85 89		      sta	BallDudeColPtr+1
+     56  f033
+     57  f033		       a9 2a		      lda	#<AdrienCol
+     58  f035		       85 8a		      sta	AdrienColPtr
+     59  f037		       a9 f1		      lda	#>AdrienCol
+     60  f039		       85 8b		      sta	AdrienColPtr+1
+     61  f03b
+     62  f03b							; Begin rendering
+     63  f03b				   StartFrame
+     64  f03b							; Turn on vblank and vsync
+     65  f03b		       a2 02		      ldx	#2
+     66  f03d		       86 01		      stx	VBLANK
+     67  f03f		       86 00		      stx	VSYNC
+     68  f041					      REPEAT	3
+     69  f041		       86 02		      stx	WSYNC
+     68  f041					      REPEND
+     69  f043		       86 02		      stx	WSYNC
+     68  f043					      REPEND
+     69  f045		       86 02		      stx	WSYNC
+     70  f047					      REPEND
+     71  f047							; Turn off vsync
+     72  f047		       a2 00		      ldx	#0
+     73  f049		       86 00		      stx	VSYNC
+     74  f04b
+     75  f04b							; Render VBLANK
+     76  f04b					      REPEAT	37
+     77  f04b		       86 02		      stx	WSYNC
+     76  f04b					      REPEND
+     77  f04d		       86 02		      stx	WSYNC
+     76  f04d					      REPEND
+     77  f04f		       86 02		      stx	WSYNC
+     76  f04f					      REPEND
+     77  f051		       86 02		      stx	WSYNC
+     76  f051					      REPEND
+     77  f053		       86 02		      stx	WSYNC
+     76  f053					      REPEND
+     77  f055		       86 02		      stx	WSYNC
+     76  f055					      REPEND
+     77  f057		       86 02		      stx	WSYNC
+     76  f057					      REPEND
+     77  f059		       86 02		      stx	WSYNC
+     76  f059					      REPEND
+     77  f05b		       86 02		      stx	WSYNC
+     76  f05b					      REPEND
+     77  f05d		       86 02		      stx	WSYNC
+     76  f05d					      REPEND
+     77  f05f		       86 02		      stx	WSYNC
+     76  f05f					      REPEND
+     77  f061		       86 02		      stx	WSYNC
+     76  f061					      REPEND
+     77  f063		       86 02		      stx	WSYNC
+     76  f063					      REPEND
+     77  f065		       86 02		      stx	WSYNC
+     76  f065					      REPEND
+     77  f067		       86 02		      stx	WSYNC
+     76  f067					      REPEND
+     77  f069		       86 02		      stx	WSYNC
+     76  f069					      REPEND
+     77  f06b		       86 02		      stx	WSYNC
+     76  f06b					      REPEND
+     77  f06d		       86 02		      stx	WSYNC
+     76  f06d					      REPEND
+     77  f06f		       86 02		      stx	WSYNC
+     76  f06f					      REPEND
+     77  f071		       86 02		      stx	WSYNC
+     76  f071					      REPEND
+     77  f073		       86 02		      stx	WSYNC
+     76  f073					      REPEND
+     77  f075		       86 02		      stx	WSYNC
+     76  f075					      REPEND
+     77  f077		       86 02		      stx	WSYNC
+     76  f077					      REPEND
+     77  f079		       86 02		      stx	WSYNC
+     76  f079					      REPEND
+     77  f07b		       86 02		      stx	WSYNC
+     76  f07b					      REPEND
+     77  f07d		       86 02		      stx	WSYNC
+     76  f07d					      REPEND
+     77  f07f		       86 02		      stx	WSYNC
+     76  f07f					      REPEND
+     77  f081		       86 02		      stx	WSYNC
+     76  f081					      REPEND
+     77  f083		       86 02		      stx	WSYNC
+     76  f083					      REPEND
+     77  f085		       86 02		      stx	WSYNC
+     76  f085					      REPEND
+     77  f087		       86 02		      stx	WSYNC
+     76  f087					      REPEND
+     77  f089		       86 02		      stx	WSYNC
+     76  f089					      REPEND
+     77  f08b		       86 02		      stx	WSYNC
+     76  f08b					      REPEND
+     77  f08d		       86 02		      stx	WSYNC
+     76  f08d					      REPEND
+     77  f08f		       86 02		      stx	WSYNC
+     76  f08f					      REPEND
+     77  f091		       86 02		      stx	WSYNC
+     76  f091					      REPEND
+     77  f093		       86 02		      stx	WSYNC
+     78  f095					      REPEND
+     79  f095							; Turn off VBLANK
+     80  f095		       86 01		      stx	VBLANK
+     81  f097
+     82  f097							; Render the visible scanlines
+     83  f097				   VisibleScanlines
+     84  f097							; Set background colour
+     85  f097		       a9 84		      lda	#$84	; Blue
+     86  f099		       85 09		      sta	COLUBK
+     87  f09b							; Set playfield colour
+     88  f09b		       a9 c2		      lda	#$C2
+     89  f09d		       85 08		      sta	COLUPF
+     90  f09f
+     91  f09f							; Setup playfield
+     92  f09f		       a9 f0		      lda	#%11110000	; PF0 uses first 4 bits and is reversed
+     93  f0a1		       85 0d		      sta	PF0
+     94  f0a3		       a9 c0		      lda	#%11000000
+     95  f0a5		       85 0e		      sta	PF1
+     96  f0a7		       a9 00		      lda	#0
+     97  f0a9		       85 0f		      sta	PF2
+     98  f0ab
+     99  f0ab							; Playfield reflection
+    100  f0ab		       a9 01		      lda	#%00000001
+    101  f0ad		       85 0a		      sta	CTRLPF
+    102  f0af
+    103  f0af		       a2 c0		      ldx	#192
+    104  f0b1				   .GameLineLoop
+    105  f0b1							; Render the 192 visible scanline
+    106  f0b1		       86 02		      stx	WSYNC
+    107  f0b3		       ca		      dex
+    108  f0b4		       d0 fb		      bne	.GameLineLoop
+    109  f0b6
+    110  f0b6							; Display vblank
+    111  f0b6				   Overscan
+    112  f0b6		       a9 02		      lda	#2
+    113  f0b8		       85 01		      sta	VBLANK
+    114  f0ba					      REPEAT	30
+    115  f0ba		       85 02		      sta	WSYNC
+    114  f0ba					      REPEND
+    115  f0bc		       85 02		      sta	WSYNC
+    114  f0bc					      REPEND
+    115  f0be		       85 02		      sta	WSYNC
+    114  f0be					      REPEND
+    115  f0c0		       85 02		      sta	WSYNC
+    114  f0c0					      REPEND
+    115  f0c2		       85 02		      sta	WSYNC
+    114  f0c2					      REPEND
+    115  f0c4		       85 02		      sta	WSYNC
+    114  f0c4					      REPEND
+    115  f0c6		       85 02		      sta	WSYNC
+    114  f0c6					      REPEND
+    115  f0c8		       85 02		      sta	WSYNC
+    114  f0c8					      REPEND
+    115  f0ca		       85 02		      sta	WSYNC
+    114  f0ca					      REPEND
+    115  f0cc		       85 02		      sta	WSYNC
+    114  f0cc					      REPEND
+    115  f0ce		       85 02		      sta	WSYNC
+    114  f0ce					      REPEND
+    115  f0d0		       85 02		      sta	WSYNC
+    114  f0d0					      REPEND
+    115  f0d2		       85 02		      sta	WSYNC
+    114  f0d2					      REPEND
+    115  f0d4		       85 02		      sta	WSYNC
+    114  f0d4					      REPEND
+    115  f0d6		       85 02		      sta	WSYNC
+    114  f0d6					      REPEND
+    115  f0d8		       85 02		      sta	WSYNC
+    114  f0d8					      REPEND
+    115  f0da		       85 02		      sta	WSYNC
+    114  f0da					      REPEND
+    115  f0dc		       85 02		      sta	WSYNC
+    114  f0dc					      REPEND
+    115  f0de		       85 02		      sta	WSYNC
+    114  f0de					      REPEND
+    115  f0e0		       85 02		      sta	WSYNC
+    114  f0e0					      REPEND
+    115  f0e2		       85 02		      sta	WSYNC
+    114  f0e2					      REPEND
+    115  f0e4		       85 02		      sta	WSYNC
+    114  f0e4					      REPEND
+    115  f0e6		       85 02		      sta	WSYNC
+    114  f0e6					      REPEND
+    115  f0e8		       85 02		      sta	WSYNC
+    114  f0e8					      REPEND
+    115  f0ea		       85 02		      sta	WSYNC
+    114  f0ea					      REPEND
+    115  f0ec		       85 02		      sta	WSYNC
+    114  f0ec					      REPEND
+    115  f0ee		       85 02		      sta	WSYNC
+    114  f0ee					      REPEND
+    115  f0f0		       85 02		      sta	WSYNC
+    114  f0f0					      REPEND
+    115  f0f2		       85 02		      sta	WSYNC
+    114  f0f2					      REPEND
+    115  f0f4		       85 02		      sta	WSYNC
+    116  f0f6					      REPEND
+    117  f0f6
+    118  f0f6		       a9 00		      lda	#0
+    119  f0f8		       85 01		      sta	VBLANK
+    120  f0fa
+    121  f0fa							; Loop forever
+    122  f0fa		       4c 3b f0 	      jmp	StartFrame
+    123  f0fd
+    124  f0fd							; Sprites
+    125  f0fd				   BallDude
+    126  f0fd		       00		      .byte.b	#%00000000
+    127  f0fe		       3c		      .byte.b	#%00111100	;$5A
+    128  f0ff		       3c		      .byte.b	#%00111100	;$5A
+    129  f100		       7e		      .byte.b	#%01111110	;$58
+    130  f101		       ff		      .byte.b	#%11111111	;$56
+    131  f102		       9f		      .byte.b	#%10011111	;$54
+    132  f103		       db		      .byte.b	#%11011011	;$54
+    133  f104		       fb		      .byte.b	#%11111011	;$52
+    134  f105		       76		      .byte.b	#%01110110	;$52
+    135  f106				   BallDudeTurning
+    136  f106		       00		      .byte.b	#%00000000
+    137  f107		       18		      .byte.b	#%00011000	;$5A
+    138  f108		       3c		      .byte.b	#%00111100	;$58
+    139  f109		       7e		      .byte.b	#%01111110	;$56
+    140  f10a		       7e		      .byte.b	#%01111110	;$54
+    141  f10b		       4a		      .byte.b	#%01001010	;$54
+    142  f10c		       6a		      .byte.b	#%01101010	;$52
+    143  f10d		       34		      .byte.b	#%00110100	;$52
+    144  f10e		       18		      .byte.b	#%00011000	;$52
+    145  f10f				   Adrien
+    146  f10f		       00		      .byte.b	#%00000000
+    147  f110		       ff		      .byte.b	#%11111111	;$16
+    148  f111		       e7		      .byte.b	#%11100111	;$16
+    149  f112		       e7		      .byte.b	#%11100111	;$18
+    150  f113		       7e		      .byte.b	#%01111110	;$18
+    151  f114		       5a		      .byte.b	#%01011010	;$1A
+    152  f115		       3c		      .byte.b	#%00111100	;$1A
+    153  f116		       3c		      .byte.b	#%00111100	;$1C
+    154  f117		       18		      .byte.b	#%00011000	;$1C
+    155  f118
+    156  f118				   BallDudeCol
+    157  f118		       00		      .byte.b	#$00
+    158  f119		       5a		      .byte.b	#$5A	;
+    159  f11a		       58		      .byte.b	#$58	;
+    160  f11b		       56		      .byte.b	#$56	;
+    161  f11c		       54		      .byte.b	#$54	;
+    162  f11d		       54		      .byte.b	#$54	;
+    163  f11e		       52		      .byte.b	#$52	;
+    164  f11f		       52		      .byte.b	#$52	;
+    165  f120		       52		      .byte.b	#$52	;
+    166  f121				   BallDudeTurningCol
+    167  f121		       00		      .byte.b	#$00
+    168  f122		       5a		      .byte.b	#$5A	;
+    169  f123		       58		      .byte.b	#$58	;
+    170  f124		       56		      .byte.b	#$56	;
+    171  f125		       54		      .byte.b	#$54	;
+    172  f126		       54		      .byte.b	#$54	;
+    173  f127		       52		      .byte.b	#$52	;
+    174  f128		       52		      .byte.b	#$52	;
+    175  f129		       52		      .byte.b	#$52	;
+    176  f12a				   AdrienCol
+    177  f12a		       00		      .byte.b	#$00
+    178  f12b		       16		      .byte.b	#$16	;
+    179  f12c		       16		      .byte.b	#$16	;
+    180  f12d		       18		      .byte.b	#$18	;
+    181  f12e		       18		      .byte.b	#$18	;
+    182  f12f		       1a		      .byte.b	#$1A	;
+    183  f130		       1a		      .byte.b	#$1A	;
+    184  f131		       1c		      .byte.b	#$1C	;
+    185  f132		       1c		      .byte.b	#$1C	;
+    186  f133
+    187  f133							; Complete ROM with 4kb
+    188  fffc					      org	$FFFC
+    189  fffc		       00 f0		      word.w	Reset
+    190  fffe		       00 f0		      word.w	Reset
