@@ -81,26 +81,26 @@ Overscan:
 	jmp StartFrame
 
 P0Bitmap:
-	byte #%00000000
-	byte #%00111100
-	byte #%01000010
-	byte #%10011001
-	byte #%10100101
-	byte #%10100101
-	byte #%10011001
-	byte #%01000010
-	byte #%00111100
+	.byte #%00000000
+	.byte #%00111100
+        .byte #%01111110
+        .byte #%11111001
+        .byte #%11110111
+        .byte #%11111111
+        .byte #%11110011
+        .byte #%01110110
+        .byte #%00111100
 
 P0Colour:
-	byte #$00
-	byte #$C8
-	byte #$84
-	byte #$0F
-	byte #$1F
-	byte #$16
-	byte #$60
-	byte #$AA
-	byte #$53
+	.byte #$00
+        .byte #$58
+        .byte #$58
+        .byte #$56
+        .byte #$56
+        .byte #$54
+        .byte #$54
+        .byte #$52
+        .byte #$52
 
 	org $FFFC
 	word Reset

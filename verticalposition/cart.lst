@@ -694,26 +694,26 @@
      81  f0d3		       4c 17 f0 	      jmp	StartFrame
      82  f0d6
      83  f0d6				   P0Bitmap
-     84  f0d6		       00		      byte.b	#%00000000
-     85  f0d7		       3c		      byte.b	#%00111100
-     86  f0d8		       42		      byte.b	#%01000010
-     87  f0d9		       99		      byte.b	#%10011001
-     88  f0da		       a5		      byte.b	#%10100101
-     89  f0db		       a5		      byte.b	#%10100101
-     90  f0dc		       99		      byte.b	#%10011001
-     91  f0dd		       42		      byte.b	#%01000010
-     92  f0de		       3c		      byte.b	#%00111100
+     84  f0d6		       00		      .byte.b	#%00000000
+     85  f0d7		       3c		      .byte.b	#%00111100
+     86  f0d8		       7e		      .byte.b	#%01111110
+     87  f0d9		       f9		      .byte.b	#%11111001
+     88  f0da		       f7		      .byte.b	#%11110111
+     89  f0db		       ff		      .byte.b	#%11111111
+     90  f0dc		       f3		      .byte.b	#%11110011
+     91  f0dd		       76		      .byte.b	#%01110110
+     92  f0de		       3c		      .byte.b	#%00111100
      93  f0df
      94  f0df				   P0Colour
-     95  f0df		       00		      byte.b	#$00
-     96  f0e0		       c8		      byte.b	#$C8
-     97  f0e1		       84		      byte.b	#$84
-     98  f0e2		       0f		      byte.b	#$0F
-     99  f0e3		       1f		      byte.b	#$1F
-    100  f0e4		       16		      byte.b	#$16
-    101  f0e5		       60		      byte.b	#$60
-    102  f0e6		       aa		      byte.b	#$AA
-    103  f0e7		       53		      byte.b	#$53
+     95  f0df		       00		      .byte.b	#$00
+     96  f0e0		       58		      .byte.b	#$58
+     97  f0e1		       58		      .byte.b	#$58
+     98  f0e2		       56		      .byte.b	#$56
+     99  f0e3		       56		      .byte.b	#$56
+    100  f0e4		       54		      .byte.b	#$54
+    101  f0e5		       54		      .byte.b	#$54
+    102  f0e6		       52		      .byte.b	#$52
+    103  f0e7		       52		      .byte.b	#$52
     104  f0e8
     105  fffc					      org	$FFFC
     106  fffc		       00 f0		      word.w	Reset
