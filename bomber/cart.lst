@@ -518,22 +518,22 @@
      39  f019		       85 82		      sta	BomberXPos
      40  f01b
      41  f01b							; Initialise sprite and palette pointers
-     42  f01b		       a9 fd		      lda	#<BallDude
+     42  f01b		       a9 25		      lda	#<BallDude
      43  f01d		       85 84		      sta	BallDudePtr
-     44  f01f		       a9 f0		      lda	#>BallDude
+     44  f01f		       a9 f1		      lda	#>BallDude
      45  f021		       85 85		      sta	BallDudePtr+1
      46  f023
-     47  f023		       a9 0f		      lda	#<Adrien
+     47  f023		       a9 37		      lda	#<Adrien
      48  f025		       85 86		      sta	AdrienPtr
      49  f027		       a9 f1		      lda	#>Adrien
      50  f029		       85 87		      sta	AdrienPtr+1
      51  f02b
-     52  f02b		       a9 18		      lda	#<BallDudeCol
+     52  f02b		       a9 40		      lda	#<BallDudeCol
      53  f02d		       85 88		      sta	BallDudeColPtr
      54  f02f		       a9 f1		      lda	#>BallDudeCol
      55  f031		       85 89		      sta	BallDudeColPtr+1
      56  f033
-     57  f033		       a9 2a		      lda	#<AdrienCol
+     57  f033		       a9 52		      lda	#<AdrienCol
      58  f035		       85 8a		      sta	AdrienColPtr
      59  f037		       a9 f1		      lda	#>AdrienCol
      60  f039		       85 8b		      sta	AdrienColPtr+1
@@ -655,149 +655,182 @@
     100  f0ab		       a9 01		      lda	#%00000001
     101  f0ad		       85 0a		      sta	CTRLPF
     102  f0af
-    103  f0af		       a2 c0		      ldx	#192
-    104  f0b1				   .GameLineLoop
-    105  f0b1							; Render the 192 visible scanline
-    106  f0b1		       86 02		      stx	WSYNC
-    107  f0b3		       ca		      dex
-    108  f0b4		       d0 fb		      bne	.GameLineLoop
-    109  f0b6
-    110  f0b6							; Display vblank
-    111  f0b6				   Overscan
-    112  f0b6		       a9 02		      lda	#2
-    113  f0b8		       85 01		      sta	VBLANK
-    114  f0ba					      REPEAT	30
-    115  f0ba		       85 02		      sta	WSYNC
-    114  f0ba					      REPEND
-    115  f0bc		       85 02		      sta	WSYNC
-    114  f0bc					      REPEND
-    115  f0be		       85 02		      sta	WSYNC
-    114  f0be					      REPEND
-    115  f0c0		       85 02		      sta	WSYNC
-    114  f0c0					      REPEND
-    115  f0c2		       85 02		      sta	WSYNC
-    114  f0c2					      REPEND
-    115  f0c4		       85 02		      sta	WSYNC
-    114  f0c4					      REPEND
-    115  f0c6		       85 02		      sta	WSYNC
-    114  f0c6					      REPEND
-    115  f0c8		       85 02		      sta	WSYNC
-    114  f0c8					      REPEND
-    115  f0ca		       85 02		      sta	WSYNC
-    114  f0ca					      REPEND
-    115  f0cc		       85 02		      sta	WSYNC
-    114  f0cc					      REPEND
-    115  f0ce		       85 02		      sta	WSYNC
-    114  f0ce					      REPEND
-    115  f0d0		       85 02		      sta	WSYNC
-    114  f0d0					      REPEND
-    115  f0d2		       85 02		      sta	WSYNC
-    114  f0d2					      REPEND
-    115  f0d4		       85 02		      sta	WSYNC
-    114  f0d4					      REPEND
-    115  f0d6		       85 02		      sta	WSYNC
-    114  f0d6					      REPEND
-    115  f0d8		       85 02		      sta	WSYNC
-    114  f0d8					      REPEND
-    115  f0da		       85 02		      sta	WSYNC
-    114  f0da					      REPEND
-    115  f0dc		       85 02		      sta	WSYNC
-    114  f0dc					      REPEND
-    115  f0de		       85 02		      sta	WSYNC
-    114  f0de					      REPEND
-    115  f0e0		       85 02		      sta	WSYNC
-    114  f0e0					      REPEND
-    115  f0e2		       85 02		      sta	WSYNC
-    114  f0e2					      REPEND
-    115  f0e4		       85 02		      sta	WSYNC
-    114  f0e4					      REPEND
-    115  f0e6		       85 02		      sta	WSYNC
-    114  f0e6					      REPEND
-    115  f0e8		       85 02		      sta	WSYNC
-    114  f0e8					      REPEND
-    115  f0ea		       85 02		      sta	WSYNC
-    114  f0ea					      REPEND
-    115  f0ec		       85 02		      sta	WSYNC
-    114  f0ec					      REPEND
-    115  f0ee		       85 02		      sta	WSYNC
-    114  f0ee					      REPEND
-    115  f0f0		       85 02		      sta	WSYNC
-    114  f0f0					      REPEND
-    115  f0f2		       85 02		      sta	WSYNC
-    114  f0f2					      REPEND
-    115  f0f4		       85 02		      sta	WSYNC
-    116  f0f6					      REPEND
-    117  f0f6
-    118  f0f6		       a9 00		      lda	#0
-    119  f0f8		       85 01		      sta	VBLANK
-    120  f0fa
-    121  f0fa							; Loop forever
-    122  f0fa		       4c 3b f0 	      jmp	StartFrame
-    123  f0fd
-    124  f0fd							; Sprites
-    125  f0fd				   BallDude
-    126  f0fd		       00		      .byte.b	#%00000000
-    127  f0fe		       3c		      .byte.b	#%00111100	;$5A
-    128  f0ff		       3c		      .byte.b	#%00111100	;$5A
-    129  f100		       7e		      .byte.b	#%01111110	;$58
-    130  f101		       ff		      .byte.b	#%11111111	;$56
-    131  f102		       9f		      .byte.b	#%10011111	;$54
-    132  f103		       db		      .byte.b	#%11011011	;$54
-    133  f104		       fb		      .byte.b	#%11111011	;$52
-    134  f105		       76		      .byte.b	#%01110110	;$52
-    135  f106				   BallDudeTurning
-    136  f106		       00		      .byte.b	#%00000000
-    137  f107		       18		      .byte.b	#%00011000	;$5A
-    138  f108		       3c		      .byte.b	#%00111100	;$58
-    139  f109		       7e		      .byte.b	#%01111110	;$56
-    140  f10a		       7e		      .byte.b	#%01111110	;$54
-    141  f10b		       4a		      .byte.b	#%01001010	;$54
-    142  f10c		       6a		      .byte.b	#%01101010	;$52
-    143  f10d		       34		      .byte.b	#%00110100	;$52
-    144  f10e		       18		      .byte.b	#%00011000	;$52
-    145  f10f				   Adrien
-    146  f10f		       00		      .byte.b	#%00000000
-    147  f110		       ff		      .byte.b	#%11111111	;$16
-    148  f111		       e7		      .byte.b	#%11100111	;$16
-    149  f112		       e7		      .byte.b	#%11100111	;$18
-    150  f113		       7e		      .byte.b	#%01111110	;$18
-    151  f114		       5a		      .byte.b	#%01011010	;$1A
-    152  f115		       3c		      .byte.b	#%00111100	;$1A
-    153  f116		       3c		      .byte.b	#%00111100	;$1C
-    154  f117		       18		      .byte.b	#%00011000	;$1C
-    155  f118
-    156  f118				   BallDudeCol
-    157  f118		       00		      .byte.b	#$00
-    158  f119		       5a		      .byte.b	#$5A	;
-    159  f11a		       58		      .byte.b	#$58	;
-    160  f11b		       56		      .byte.b	#$56	;
-    161  f11c		       54		      .byte.b	#$54	;
-    162  f11d		       54		      .byte.b	#$54	;
-    163  f11e		       52		      .byte.b	#$52	;
-    164  f11f		       52		      .byte.b	#$52	;
-    165  f120		       52		      .byte.b	#$52	;
-    166  f121				   BallDudeTurningCol
-    167  f121		       00		      .byte.b	#$00
-    168  f122		       5a		      .byte.b	#$5A	;
-    169  f123		       58		      .byte.b	#$58	;
-    170  f124		       56		      .byte.b	#$56	;
-    171  f125		       54		      .byte.b	#$54	;
-    172  f126		       54		      .byte.b	#$54	;
-    173  f127		       52		      .byte.b	#$52	;
-    174  f128		       52		      .byte.b	#$52	;
-    175  f129		       52		      .byte.b	#$52	;
-    176  f12a				   AdrienCol
-    177  f12a		       00		      .byte.b	#$00
-    178  f12b		       16		      .byte.b	#$16	;
-    179  f12c		       16		      .byte.b	#$16	;
-    180  f12d		       18		      .byte.b	#$18	;
-    181  f12e		       18		      .byte.b	#$18	;
-    182  f12f		       1a		      .byte.b	#$1A	;
-    183  f130		       1a		      .byte.b	#$1A	;
-    184  f131		       1c		      .byte.b	#$1C	;
-    185  f132		       1c		      .byte.b	#$1C	;
-    186  f133
-    187  f133							; Complete ROM with 4kb
-    188  fffc					      org	$FFFC
-    189  fffc		       00 f0		      word.w	Reset
-    190  fffe		       00 f0		      word.w	Reset
+    103  f0af		       a2 60		      ldx	#96
+    104  f0b1
+    105  f0b1							; Render the 96 visible scanline
+    106  f0b1							; Using a 2 line kernel
+    107  f0b1				   .GameLineLoop
+    108  f0b1				   .InsideBallDude
+    109  f0b1		       8a		      txa
+    110  f0b2		       38		      sec
+    111  f0b3		       e5 81		      sbc	JetYPos
+    112  f0b5		       c5 09		      cmp	SPRITE_HEIGHT
+    113  f0b7		       90 02		      bcc	.DrawSpriteP0
+    114  f0b9		       a9 00		      lda	#0
+    115  f0bb
+    116  f0bb				   .DrawSpriteP0
+    117  f0bb		       a8		      tay
+    118  f0bc		       b1 84		      lda	(BallDudePtr),Y	; Y register is only register that can work with pointers
+    119  f0be		       85 02		      sta	WSYNC	; Wait for scanline
+    120  f0c0		       85 1b		      sta	GRP0	; Set graphics for P0
+    121  f0c2		       b1 88		      lda	(BallDudeColPtr),Y
+    122  f0c4		       85 06		      sta	COLUP0
+    123  f0c6
+    124  f0c6				   .InsideAdrien
+    125  f0c6		       8a		      txa
+    126  f0c7		       38		      sec
+    127  f0c8		       e5 83		      sbc	BomberYPos
+    128  f0ca		       c5 09		      cmp	SPRITE_HEIGHT
+    129  f0cc		       90 02		      bcc	.DrawSpriteP1
+    130  f0ce		       a9 00		      lda	#0
+    131  f0d0
+    132  f0d0				   .DrawSpriteP1
+    133  f0d0		       a8		      tay
+    134  f0d1		       b1 86		      lda	(AdrienPtr),Y	; Y register is only register that can work with pointers
+    135  f0d3		       85 02		      sta	WSYNC	; Wait for scanline
+    136  f0d5		       85 1c		      sta	GRP1	; Set graphics for P0
+    137  f0d7		       b1 8a		      lda	(AdrienColPtr),Y
+    138  f0d9		       85 07		      sta	COLUP1
+    139  f0db
+    140  f0db		       ca		      dex
+    141  f0dc		       d0 d3		      bne	.GameLineLoop
+    142  f0de
+    143  f0de							; Display vblank
+    144  f0de				   Overscan
+    145  f0de		       a9 02		      lda	#2
+    146  f0e0		       85 01		      sta	VBLANK
+    147  f0e2					      REPEAT	30
+    148  f0e2		       85 02		      sta	WSYNC
+    147  f0e2					      REPEND
+    148  f0e4		       85 02		      sta	WSYNC
+    147  f0e4					      REPEND
+    148  f0e6		       85 02		      sta	WSYNC
+    147  f0e6					      REPEND
+    148  f0e8		       85 02		      sta	WSYNC
+    147  f0e8					      REPEND
+    148  f0ea		       85 02		      sta	WSYNC
+    147  f0ea					      REPEND
+    148  f0ec		       85 02		      sta	WSYNC
+    147  f0ec					      REPEND
+    148  f0ee		       85 02		      sta	WSYNC
+    147  f0ee					      REPEND
+    148  f0f0		       85 02		      sta	WSYNC
+    147  f0f0					      REPEND
+    148  f0f2		       85 02		      sta	WSYNC
+    147  f0f2					      REPEND
+    148  f0f4		       85 02		      sta	WSYNC
+    147  f0f4					      REPEND
+    148  f0f6		       85 02		      sta	WSYNC
+    147  f0f6					      REPEND
+    148  f0f8		       85 02		      sta	WSYNC
+    147  f0f8					      REPEND
+    148  f0fa		       85 02		      sta	WSYNC
+    147  f0fa					      REPEND
+    148  f0fc		       85 02		      sta	WSYNC
+    147  f0fc					      REPEND
+    148  f0fe		       85 02		      sta	WSYNC
+    147  f0fe					      REPEND
+    148  f100		       85 02		      sta	WSYNC
+    147  f100					      REPEND
+    148  f102		       85 02		      sta	WSYNC
+    147  f102					      REPEND
+    148  f104		       85 02		      sta	WSYNC
+    147  f104					      REPEND
+    148  f106		       85 02		      sta	WSYNC
+    147  f106					      REPEND
+    148  f108		       85 02		      sta	WSYNC
+    147  f108					      REPEND
+    148  f10a		       85 02		      sta	WSYNC
+    147  f10a					      REPEND
+    148  f10c		       85 02		      sta	WSYNC
+    147  f10c					      REPEND
+    148  f10e		       85 02		      sta	WSYNC
+    147  f10e					      REPEND
+    148  f110		       85 02		      sta	WSYNC
+    147  f110					      REPEND
+    148  f112		       85 02		      sta	WSYNC
+    147  f112					      REPEND
+    148  f114		       85 02		      sta	WSYNC
+    147  f114					      REPEND
+    148  f116		       85 02		      sta	WSYNC
+    147  f116					      REPEND
+    148  f118		       85 02		      sta	WSYNC
+    147  f118					      REPEND
+    148  f11a		       85 02		      sta	WSYNC
+    147  f11a					      REPEND
+    148  f11c		       85 02		      sta	WSYNC
+    149  f11e					      REPEND
+    150  f11e
+    151  f11e		       a9 00		      lda	#0
+    152  f120		       85 01		      sta	VBLANK
+    153  f122
+    154  f122							; Loop forever
+    155  f122		       4c 3b f0 	      jmp	StartFrame
+    156  f125
+    157  f125							; Sprites
+    158  f125				   BallDude
+    159  f125		       00		      .byte.b	#%00000000
+    160  f126		       7e		      .byte.b	#%01111110	;$5A
+    161  f127		       ff		      .byte.b	#%11111111	;$5A
+    162  f128		       ff		      .byte.b	#%11111111	;$58
+    163  f129		       ff		      .byte.b	#%11111111	;$56
+    164  f12a		       9f		      .byte.b	#%10011111	;$54
+    165  f12b		       db		      .byte.b	#%11011011	;$54
+    166  f12c		       fb		      .byte.b	#%11111011	;$52
+    167  f12d		       76		      .byte.b	#%01110110	;$52
+    168  f12e				   BallDudeTurning
+    169  f12e		       00		      .byte.b	#%00000000
+    170  f12f		       18		      .byte.b	#%00011000	;$5A
+    171  f130		       3c		      .byte.b	#%00111100	;$58
+    172  f131		       7e		      .byte.b	#%01111110	;$56
+    173  f132		       7e		      .byte.b	#%01111110	;$54
+    174  f133		       4a		      .byte.b	#%01001010	;$54
+    175  f134		       6a		      .byte.b	#%01101010	;$52
+    176  f135		       34		      .byte.b	#%00110100	;$52
+    177  f136		       18		      .byte.b	#%00011000	;$52
+    178  f137				   Adrien
+    179  f137		       00		      .byte.b	#%00000000
+    180  f138		       ff		      .byte.b	#%11111111	;$16
+    181  f139		       e7		      .byte.b	#%11100111	;$16
+    182  f13a		       e7		      .byte.b	#%11100111	;$18
+    183  f13b		       7e		      .byte.b	#%01111110	;$18
+    184  f13c		       5a		      .byte.b	#%01011010	;$1A
+    185  f13d		       3c		      .byte.b	#%00111100	;$1A
+    186  f13e		       3c		      .byte.b	#%00111100	;$1C
+    187  f13f		       18		      .byte.b	#%00011000	;$1C
+    188  f140
+    189  f140				   BallDudeCol
+    190  f140		       00		      .byte.b	#$00
+    191  f141		       5a		      .byte.b	#$5A	;
+    192  f142		       58		      .byte.b	#$58	;
+    193  f143		       56		      .byte.b	#$56	;
+    194  f144		       54		      .byte.b	#$54	;
+    195  f145		       54		      .byte.b	#$54	;
+    196  f146		       52		      .byte.b	#$52	;
+    197  f147		       52		      .byte.b	#$52	;
+    198  f148		       52		      .byte.b	#$52	;
+    199  f149				   BallDudeTurningCol
+    200  f149		       00		      .byte.b	#$00
+    201  f14a		       5a		      .byte.b	#$5A	;
+    202  f14b		       58		      .byte.b	#$58	;
+    203  f14c		       56		      .byte.b	#$56	;
+    204  f14d		       54		      .byte.b	#$54	;
+    205  f14e		       54		      .byte.b	#$54	;
+    206  f14f		       52		      .byte.b	#$52	;
+    207  f150		       52		      .byte.b	#$52	;
+    208  f151		       52		      .byte.b	#$52	;
+    209  f152				   AdrienCol
+    210  f152		       00		      .byte.b	#$00
+    211  f153		       16		      .byte.b	#$16	;
+    212  f154		       16		      .byte.b	#$16	;
+    213  f155		       18		      .byte.b	#$18	;
+    214  f156		       18		      .byte.b	#$18	;
+    215  f157		       1a		      .byte.b	#$1A	;
+    216  f158		       1a		      .byte.b	#$1A	;
+    217  f159		       1c		      .byte.b	#$1C	;
+    218  f15a		       1c		      .byte.b	#$1C	;
+    219  f15b
+    220  f15b							; Complete ROM with 4kb
+    221  fffc					      org	$FFFC
+    222  fffc		       00 f0		      word.w	Reset
+    223  fffe		       00 f0		      word.w	Reset

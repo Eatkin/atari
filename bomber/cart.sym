@@ -1,8 +1,12 @@
 --- Symbol List (sorted by symbol)
+0.DrawSpriteP0           f0bb              (R )
+0.DrawSpriteP1           f0d0              (R )
 0.GameLineLoop           f0b1              (R )
+0.InsideAdrien           f0c6                  
+0.InsideBallDude         f0b1                  
 1.CLEAR_STACK            f006              (R )
-Adrien                   f10f              (R )
-AdrienCol                f12a              (R )
+Adrien                   f137              (R )
+AdrienCol                f152              (R )
 AdrienColPtr             008a              (R )
 AdrienPtr                0086              (R )
 AUDC0                    0015                  
@@ -11,17 +15,17 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-BallDude                 f0fd              (R )
-BallDudeCol              f118              (R )
+BallDude                 f125              (R )
+BallDudeCol              f140              (R )
 BallDudeColPtr           0088              (R )
 BallDudePtr              0084              (R )
-BallDudeTurning          f106                  
-BallDudeTurningCol       f121                  
+BallDudeTurning          f12e                  
+BallDudeTurningCol       f149                  
 BomberXPos               0082              (R )
 BomberYPos               0083              (R )
 COLUBK                   0009              (R )
-COLUP0                   0006                  
-COLUP1                   0007                  
+COLUP0                   0006              (R )
+COLUP1                   0007              (R )
 COLUPF                   0008              (R )
 CTRLPF                   000a              (R )
 CXBLPF                   0006                  
@@ -36,8 +40,8 @@ CXPPMM                   0007
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-GRP0                     001b                  
-GRP1                     001c                  
+GRP0                     001b              (R )
+GRP1                     001c              (R )
 HMBL                     0024                  
 HMCLR                    002b                  
 HMM0                     0022                  
@@ -56,7 +60,7 @@ JetXPos                  0080              (R )
 JetYPos                  0081              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-Overscan                 f0b6                  
+Overscan                 f0de                  
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
@@ -71,7 +75,7 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
-SPRITE_HEIGHT            0009                  
+SPRITE_HEIGHT            0009              (R )
 StartFrame               f03b              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  

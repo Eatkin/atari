@@ -100,10 +100,43 @@ VisibleScanlines:
 	lda #%00000001
 	sta CTRLPF
 
-	ldx #192
+	ldx #96
+
+; Render the 96 visible scanline
+; Using a 2 line kernel
 .GameLineLoop:
-	; Render the 192 visible scanline
-	stx WSYNC
+.InsideBallDude:
+	txa
+	sec
+	sbc JetYPos
+	cmp SPRITE_HEIGHT
+	bcc .DrawSpriteP0
+	lda #0
+
+.DrawSpriteP0:
+	tay
+	lda (BallDudePtr),Y	; Y register is only register that can work with pointers
+	sta WSYNC		; Wait for scanline
+	sta GRP0		; Set graphics for P0
+	lda (BallDudeColPtr),Y
+	sta COLUP0
+	
+.InsideAdrien:
+	txa
+	sec
+	sbc BomberYPos
+	cmp SPRITE_HEIGHT
+	bcc .DrawSpriteP1
+	lda #0
+
+.DrawSpriteP1:
+	tay
+	lda (AdrienPtr),Y	; Y register is only register that can work with pointers
+	sta WSYNC		; Wait for scanline
+	sta GRP1		; Set graphics for P0
+	lda (AdrienColPtr),Y
+	sta COLUP1
+
 	dex
 	bne .GameLineLoop	
 
@@ -124,9 +157,9 @@ Overscan:
 ; Sprites
 BallDude:
 	.byte #%00000000
-        .byte #%00111100;$5A
-        .byte #%00111100;$5A
-        .byte #%01111110;$58
+        .byte #%01111110;$5A
+        .byte #%11111111;$5A
+        .byte #%11111111;$58
         .byte #%11111111;$56
         .byte #%10011111;$54
         .byte #%11011011;$54
