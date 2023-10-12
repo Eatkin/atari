@@ -5,8 +5,8 @@
 0.InsideAdrien           f0c6                  
 0.InsideBallDude         f0b1                  
 1.CLEAR_STACK            f006              (R )
-Adrien                   f137              (R )
-AdrienCol                f152              (R )
+Adrien                   f13c              (R )
+AdrienCol                f157              (R )
 AdrienColPtr             008a              (R )
 AdrienPtr                0086              (R )
 AUDC0                    0015                  
@@ -15,12 +15,12 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-BallDude                 f125              (R )
-BallDudeCol              f140              (R )
+BallDude                 f12a              (R )
+BallDudeCol              f145              (R )
 BallDudeColPtr           0088              (R )
 BallDudePtr              0084              (R )
-BallDudeTurning          f12e                  
-BallDudeTurningCol       f149                  
+BallDudeTurning          f133                  
+BallDudeTurningCol       f14e                  
 BomberXPos               0082              (R )
 BomberYPos               0083              (R )
 COLUBK                   0009              (R )
@@ -59,8 +59,8 @@ INTIM                    0284
 JetXPos                  0080              (R )
 JetYPos                  0081              (R )
 NUSIZ0                   0004                  
-NUSIZ1                   0005                  
-Overscan                 f0de                  
+NUSIZ1                   0005              (R )
+Overscan                 f0e3                  
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )

@@ -131,6 +131,12 @@ VisibleScanlines:
 
 .DrawSpriteP1:
 	tay
+
+	; Set Adrien to be thicc because it'll be funny idk
+	lda #%00000111
+	sta NUSIZ1
+	tya
+
 	lda (AdrienPtr),Y	; Y register is only register that can work with pointers
 	sta WSYNC		; Wait for scanline
 	sta GRP1		; Set graphics for P0
