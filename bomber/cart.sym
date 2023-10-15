@@ -1,12 +1,13 @@
 --- Symbol List (sorted by symbol)
-0.DrawSpriteP0           f0bb              (R )
-0.DrawSpriteP1           f0d0              (R )
-0.GameLineLoop           f0b1              (R )
-0.InsideAdrien           f0c6                  
-0.InsideBallDude         f0b1                  
+0.DrawSpriteP0           f0cd              (R )
+0.DrawSpriteP1           f0e2              (R )
+0.GameLineLoop           f0c3              (R )
+0.InsideAdrien           f0d8                  
+0.InsideBallDude         f0c3                  
 1.CLEAR_STACK            f006              (R )
-Adrien                   f13c              (R )
-AdrienCol                f157              (R )
+2.DivideLoop             f13f              (R )
+Adrien                   f162              (R )
+AdrienCol                f17d              (R )
 AdrienColPtr             008a              (R )
 AdrienPtr                0086              (R )
 AUDC0                    0015                  
@@ -15,12 +16,12 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-BallDude                 f12a              (R )
-BallDudeCol              f145              (R )
+BallDude                 f150              (R )
+BallDudeCol              f16b              (R )
 BallDudeColPtr           0088              (R )
 BallDudePtr              0084              (R )
-BallDudeTurning          f133                  
-BallDudeTurningCol       f14e                  
+BallDudeTurning          f159                  
+BallDudeTurningCol       f174                  
 BomberXPos               0082              (R )
 BomberYPos               0083              (R )
 COLUBK                   0009              (R )
@@ -46,8 +47,8 @@ HMBL                     0024
 HMCLR                    002b                  
 HMM0                     0022                  
 HMM1                     0023                  
-HMOVE                    002a                  
-HMP0                     0020                  
+HMOVE                    002a              (R )
+HMP0                     0020              (R )
 HMP1                     0021                  
 INPT0                    0008                  
 INPT1                    0009                  
@@ -60,7 +61,7 @@ JetXPos                  0080              (R )
 JetYPos                  0081              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005              (R )
-Overscan                 f0e3                  
+Overscan                 f0f5                  
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
@@ -72,9 +73,10 @@ RESM0                    0012
 RESM1                    0013                  
 RESMP0                   0028                  
 RESMP1                   0029                  
-RESP0                    0010                  
+RESP0                    0010              (R )
 RESP1                    0011                  
 RSYNC                    0003                  
+SetObjXPos               f13c              (R )
 SPRITE_HEIGHT            0009              (R )
 StartFrame               f03b              (R )
 SWACNT                   0281                  
@@ -95,7 +97,7 @@ VDELP0                   0025
 VDELP1                   0026                  
 VERSION_MACRO            0069                  
 VERSION_VCS              0069                  
-VisibleScanlines         f097                  
+VisibleScanlines         f0a9                  
 VSYNC                    0000              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.

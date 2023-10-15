@@ -26,16 +26,16 @@ Reset:
 
 ; Initialise RAM variables and TIA registers
 	; Set initial player coordinates
-	lda #10
+	lda #80
 	sta JetYPos
-	lda #60
+	lda #0
 	sta JetXPos
 	
 	; Set initial bomber coordinates
 	; Basically just some random coordinates as placeholder lol
 	lda #83
 	sta BomberYPos
-	lda #15
+	lda #80
 	sta BomberXPos
 
 ; Initialise sprite and palette pointers
@@ -61,6 +61,21 @@ Reset:
 
 ; Begin rendering
 StartFrame:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Pre-vblank calculations
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	lda JetXPos
+	ldy #0		; Corresponds to P0
+	jsr SetObjXPos
+
+	lda BomberXPos
+	ldy #1		; Corresponds to p1
+	jsr SetObjXPos
+
+	; Poke registers
+	sta WSYNC
+	sta HMOVE
+
 	; Turn on vblank and vsync
 	ldx #2
 	stx VBLANK
@@ -159,6 +174,27 @@ Overscan:
 
 	; Loop forever
 	jmp StartFrame
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; accumulator contains x-posiiton
+; y register contains object (0:player0, 1:player1, 2:missile0, 3:missile1, 4:ball)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SetObjXPos subroutine
+	sta WSYNC
+	sec
+.DivideLoop:
+	sbc #15
+	bcs .DivideLoop	; loop while carry is set
+
+	eor #7		; exclusive OR with accumulator
+			; A will be between -8 and 7
+	REPEAT 4
+		asl	; bitshift a, HMP0 uses only 4 bits
+	REPEND
+
+	sta HMP0,Y	; set fine position value
+	sta RESP0,Y	; set coarse position value
+	rts
 
 ; Sprites
 BallDude:
