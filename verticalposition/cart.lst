@@ -695,25 +695,25 @@
      82  f0d6
      83  f0d6				   P0Bitmap
      84  f0d6		       00		      .byte.b	#%00000000
-     85  f0d7		       3c		      .byte.b	#%00111100
-     86  f0d8		       7e		      .byte.b	#%01111110
-     87  f0d9		       f9		      .byte.b	#%11111001
-     88  f0da		       f7		      .byte.b	#%11110111
-     89  f0db		       ff		      .byte.b	#%11111111
-     90  f0dc		       f3		      .byte.b	#%11110011
-     91  f0dd		       76		      .byte.b	#%01110110
-     92  f0de		       3c		      .byte.b	#%00111100
+     85  f0d7		       ff		      .byte.b	#%11111111	;$16
+     86  f0d8		       e7		      .byte.b	#%11100111	;$16
+     87  f0d9		       e7		      .byte.b	#%11100111	;$18
+     88  f0da		       7e		      .byte.b	#%01111110	;$18
+     89  f0db		       5a		      .byte.b	#%01011010	;$1A
+     90  f0dc		       3c		      .byte.b	#%00111100	;$1A
+     91  f0dd		       3c		      .byte.b	#%00111100	;$1C
+     92  f0de		       18		      .byte.b	#%00011000	;$1C
      93  f0df
      94  f0df				   P0Colour
      95  f0df		       00		      .byte.b	#$00
-     96  f0e0		       58		      .byte.b	#$58
-     97  f0e1		       58		      .byte.b	#$58
-     98  f0e2		       56		      .byte.b	#$56
-     99  f0e3		       56		      .byte.b	#$56
-    100  f0e4		       54		      .byte.b	#$54
-    101  f0e5		       54		      .byte.b	#$54
-    102  f0e6		       52		      .byte.b	#$52
-    103  f0e7		       52		      .byte.b	#$52
+     96  f0e0		       16		      .byte.b	#$16	;
+     97  f0e1		       16		      .byte.b	#$16	;
+     98  f0e2		       18		      .byte.b	#$18	;
+     99  f0e3		       18		      .byte.b	#$18	;
+    100  f0e4		       1a		      .byte.b	#$1A	;
+    101  f0e5		       1a		      .byte.b	#$1A	;
+    102  f0e6		       1c		      .byte.b	#$1C	;
+    103  f0e7		       1c		      .byte.b	#$1C	;
     104  f0e8
     105  fffc					      org	$FFFC
     106  fffc		       00 f0		      word.w	Reset

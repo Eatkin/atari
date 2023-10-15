@@ -82,25 +82,25 @@ Overscan:
 
 P0Bitmap:
 	.byte #%00000000
-	.byte #%00111100
-        .byte #%01111110
-        .byte #%11111001
-        .byte #%11110111
-        .byte #%11111111
-        .byte #%11110011
-        .byte #%01110110
-        .byte #%00111100
+        .byte #%11111111;$16
+        .byte #%11100111;$16
+        .byte #%11100111;$18
+        .byte #%01111110;$18
+        .byte #%01011010;$1A
+        .byte #%00111100;$1A
+        .byte #%00111100;$1C
+        .byte #%00011000;$1C
 
 P0Colour:
 	.byte #$00
-        .byte #$58
-        .byte #$58
-        .byte #$56
-        .byte #$56
-        .byte #$54
-        .byte #$54
-        .byte #$52
-        .byte #$52
+        .byte #$16;
+        .byte #$16;
+        .byte #$18;
+        .byte #$18;
+        .byte #$1A;
+        .byte #$1A;
+        .byte #$1C;
+        .byte #$1C;
 
 	org $FFFC
 	word Reset
