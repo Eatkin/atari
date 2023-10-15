@@ -14,6 +14,7 @@ BallDudePtr	word
 AdrienPtr	word
 BallDudeColPtr	word
 AdrienColPtr	word
+JetAnimOffset	byte
 
 ; Define constants
 SPRITE_HEIGHT = 9
@@ -129,6 +130,7 @@ VisibleScanlines:
 	lda #0
 
 .DrawSpriteP0:
+	clc
 	tay
 	lda (BallDudePtr),Y	; Y register is only register that can work with pointers
 	sta WSYNC		; Wait for scanline
@@ -172,6 +174,57 @@ Overscan:
 	lda #0
 	sta VBLANK
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Joystick input
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	ldx JetXPos
+CheckP0Up:
+	lda #%00010000
+	bit SWCHA
+	bne CheckP0Down
+	inc JetYPos
+CheckP0Down:
+	lda #%00100000
+	bit SWCHA
+	bne CheckP0Left
+	dec JetYPos
+CheckP0Left:
+	lda #%01000000
+	bit SWCHA
+	bne CheckP0Right 
+	dec JetXPos
+CheckP0Right:
+	lda #%10000000
+	bit SWCHA
+	bne NoInput
+	inc JetXPos
+NoInput:
+	lda #0
+	sta JetAnimOffset
+	cpx JetXPos
+	beq NoChange
+	; Set the sprite pointer to BallDude Turning
+	lda SPRITE_HEIGHT
+	sta JetAnimOffset
+NoChange:
+
+; Ensure that our X position does not exceed bounds of 0-160
+ClampXPos:
+	lda JetXPos
+	clc
+	cmp #160	
+	; Carry is set if we exceed 160
+	bcc SkipUpperBound
+	lda #160
+	sta JetXPos
+SkipUpperBound:
+	lda #0
+	clc
+	cmp BomberXPos
+	; Carry is set if BomberXPos is negative
+	bcc SkipLowerBound
+	sta JetXPos
+SkipLowerBound:
 	; Loop forever
 	jmp StartFrame
 
