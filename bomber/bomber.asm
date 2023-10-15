@@ -131,6 +131,7 @@ VisibleScanlines:
 
 .DrawSpriteP0:
 	clc
+	adc JetAnimOffset
 	tay
 	lda (BallDudePtr),Y	; Y register is only register that can work with pointers
 	sta WSYNC		; Wait for scanline
@@ -208,23 +209,21 @@ NoInput:
 	sta JetAnimOffset
 NoChange:
 
-; Ensure that our X position does not exceed bounds of 0-160
-ClampXPos:
-	lda JetXPos
+UpdateBomberPosition:
 	clc
-	cmp #160	
-	; Carry is set if we exceed 160
-	bcc SkipUpperBound
-	lda #160
-	sta JetXPos
-SkipUpperBound:
-	lda #0
-	clc
-	cmp BomberXPos
-	; Carry is set if BomberXPos is negative
-	bcc SkipLowerBound
-	sta JetXPos
-SkipLowerBound:
+	lda BomberYPos
+	cmp #0
+	bmi .ResetBomberPosition
+
+	dec BomberYPos
+	jmp EndPositionUpdate
+
+.ResetBomberPosition:
+	lda #96
+	sta BomberYPos
+
+EndPositionUpdate:
+
 	; Loop forever
 	jmp StartFrame
 

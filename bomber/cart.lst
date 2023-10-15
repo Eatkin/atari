@@ -519,22 +519,22 @@
      40  f019		       85 82		      sta	BomberXPos
      41  f01b
      42  f01b							; Initialise sprite and palette pointers
-     43  f01b		       a9 99		      lda	#<BallDude
+     43  f01b		       a9 95		      lda	#<BallDude
      44  f01d		       85 84		      sta	BallDudePtr
      45  f01f		       a9 f1		      lda	#>BallDude
      46  f021		       85 85		      sta	BallDudePtr+1
      47  f023
-     48  f023		       a9 ab		      lda	#<Adrien
+     48  f023		       a9 a7		      lda	#<Adrien
      49  f025		       85 86		      sta	AdrienPtr
      50  f027		       a9 f1		      lda	#>Adrien
      51  f029		       85 87		      sta	AdrienPtr+1
      52  f02b
-     53  f02b		       a9 b4		      lda	#<BallDudeCol
+     53  f02b		       a9 b0		      lda	#<BallDudeCol
      54  f02d		       85 88		      sta	BallDudeColPtr
      55  f02f		       a9 f1		      lda	#>BallDudeCol
      56  f031		       85 89		      sta	BallDudeColPtr+1
      57  f033
-     58  f033		       a9 c6		      lda	#<AdrienCol
+     58  f033		       a9 c2		      lda	#<AdrienCol
      59  f035		       85 8a		      sta	AdrienColPtr
      60  f037		       a9 f1		      lda	#>AdrienCol
      61  f039		       85 8b		      sta	AdrienColPtr+1
@@ -546,11 +546,11 @@
      67  f03b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      68  f03b		       a5 80		      lda	JetXPos
      69  f03d		       a0 00		      ldy	#0	; Corresponds to P0
-     70  f03f		       20 85 f1 	      jsr	SetObjXPos
+     70  f03f		       20 81 f1 	      jsr	SetObjXPos
      71  f042
      72  f042		       a5 82		      lda	BomberXPos
      73  f044		       a0 01		      ldy	#1	; Corresponds to p1
-     74  f046		       20 85 f1 	      jsr	SetObjXPos
+     74  f046		       20 81 f1 	      jsr	SetObjXPos
      75  f049
      76  f049							; Poke registers
      77  f049		       85 02		      sta	WSYNC
@@ -822,117 +822,115 @@
     209  f16c		       85 8c		      sta	JetAnimOffset
     210  f16e				   NoChange
     211  f16e
-    212  f16e							; Ensure that our X position does not exceed bounds of 0-160
-    213  f16e				   ClampXPos
-    214  f16e		       a5 80		      lda	JetXPos
-    215  f170		       18		      clc
-    216  f171		       c9 a0		      cmp	#160
-    217  f173							; Carry is set if we exceed 160
-    218  f173		       90 04		      bcc	SkipUpperBound
-    219  f175		       a9 a0		      lda	#160
-    220  f177		       85 80		      sta	JetXPos
-    221  f179				   SkipUpperBound
-    222  f179		       a9 00		      lda	#0
-    223  f17b		       18		      clc
-    224  f17c		       c5 82		      cmp	BomberXPos
-    225  f17e							; Carry is set if BomberXPos is negative
-    226  f17e		       90 02		      bcc	SkipLowerBound
-    227  f180		       85 80		      sta	JetXPos
-    228  f182				   SkipLowerBound
-    229  f182							; Loop forever
-    230  f182		       4c 3b f0 	      jmp	StartFrame
-    231  f185
-    232  f185							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    233  f185							; accumulator contains x-posiiton
-    234  f185							; y register contains object (0:player0, 1:player1, 2:missile0, 3:missile1, 4:ball)
-    235  f185							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    236  f185				   SetObjXPos subroutine
-    237  f185		       85 02		      sta	WSYNC
-    238  f187		       38		      sec
-    239  f188				   .DivideLoop
-    240  f188		       e9 0f		      sbc	#15
-    241  f18a		       b0 fc		      bcs	.DivideLoop	; loop while carry is set
-    242  f18c
-    243  f18c		       49 07		      eor	#7	; exclusive OR with accumulator
-    244  f18e							; A will be between -8 and 7
-    245  f18e					      REPEAT	4
-    246  f18e		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    212  f16e				   UpdateBomberPosition
+    213  f16e		       18		      clc
+    214  f16f		       a5 83		      lda	BomberYPos
+    215  f171		       c9 00		      cmp	#0
+    216  f173		       30 05		      bmi	.ResetBomberPosition
+    217  f175
+    218  f175		       c6 83		      dec	BomberYPos
+    219  f177		       4c 7e f1 	      jmp	EndPositionUpdate
+    220  f17a
+    221  f17a				   .ResetBomberPosition
+    222  f17a		       a9 60		      lda	#96
+    223  f17c		       85 83		      sta	BomberYPos
+    224  f17e
+    225  f17e				   EndPositionUpdate
+    226  f17e
+    227  f17e							; Loop forever
+    228  f17e		       4c 3b f0 	      jmp	StartFrame
+    229  f181
+    230  f181							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    231  f181							; accumulator contains x-posiiton
+    232  f181							; y register contains object (0:player0, 1:player1, 2:missile0, 3:missile1, 4:ball)
+    233  f181							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    234  f181				   SetObjXPos subroutine
+    235  f181		       85 02		      sta	WSYNC
+    236  f183		       38		      sec
+    237  f184				   .DivideLoop
+    238  f184		       e9 0f		      sbc	#15
+    239  f186		       b0 fc		      bcs	.DivideLoop	; loop while carry is set
+    240  f188
+    241  f188		       49 07		      eor	#7	; exclusive OR with accumulator
+    242  f18a							; A will be between -8 and 7
+    243  f18a					      REPEAT	4
+    244  f18a		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    243  f18a					      REPEND
+    244  f18b		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    243  f18b					      REPEND
+    244  f18c		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    243  f18c					      REPEND
+    244  f18d		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
     245  f18e					      REPEND
-    246  f18f		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
-    245  f18f					      REPEND
-    246  f190		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
-    245  f190					      REPEND
-    246  f191		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
-    247  f192					      REPEND
-    248  f192
-    249  f192		       99 20 00 	      sta	HMP0,Y	; set fine position value
-    250  f195		       99 10 00 	      sta	RESP0,Y	; set coarse position value
-    251  f198		       60		      rts
-    252  f199
-    253  f199							; Sprites
-    254  f199				   BallDude
-    255  f199		       00		      .byte.b	#%00000000
-    256  f19a		       7e		      .byte.b	#%01111110	;$5A
-    257  f19b		       ff		      .byte.b	#%11111111	;$5A
-    258  f19c		       ff		      .byte.b	#%11111111	;$58
-    259  f19d		       ff		      .byte.b	#%11111111	;$56
-    260  f19e		       9f		      .byte.b	#%10011111	;$54
-    261  f19f		       db		      .byte.b	#%11011011	;$54
-    262  f1a0		       fb		      .byte.b	#%11111011	;$52
-    263  f1a1		       76		      .byte.b	#%01110110	;$52
-    264  f1a2				   BallDudeTurning
-    265  f1a2		       00		      .byte.b	#%00000000
-    266  f1a3		       18		      .byte.b	#%00011000	;$5A
-    267  f1a4		       3c		      .byte.b	#%00111100	;$58
-    268  f1a5		       7e		      .byte.b	#%01111110	;$56
-    269  f1a6		       7e		      .byte.b	#%01111110	;$54
-    270  f1a7		       4a		      .byte.b	#%01001010	;$54
-    271  f1a8		       6a		      .byte.b	#%01101010	;$52
-    272  f1a9		       34		      .byte.b	#%00110100	;$52
-    273  f1aa		       18		      .byte.b	#%00011000	;$52
-    274  f1ab				   Adrien
-    275  f1ab		       00		      .byte.b	#%00000000
-    276  f1ac		       ff		      .byte.b	#%11111111	;$16
-    277  f1ad		       e7		      .byte.b	#%11100111	;$16
-    278  f1ae		       e7		      .byte.b	#%11100111	;$18
-    279  f1af		       7e		      .byte.b	#%01111110	;$18
-    280  f1b0		       5a		      .byte.b	#%01011010	;$1A
-    281  f1b1		       3c		      .byte.b	#%00111100	;$1A
-    282  f1b2		       3c		      .byte.b	#%00111100	;$1C
-    283  f1b3		       18		      .byte.b	#%00011000	;$1C
-    284  f1b4
-    285  f1b4				   BallDudeCol
-    286  f1b4		       00		      .byte.b	#$00
-    287  f1b5		       5a		      .byte.b	#$5A	;
-    288  f1b6		       58		      .byte.b	#$58	;
-    289  f1b7		       56		      .byte.b	#$56	;
-    290  f1b8		       54		      .byte.b	#$54	;
-    291  f1b9		       54		      .byte.b	#$54	;
-    292  f1ba		       52		      .byte.b	#$52	;
-    293  f1bb		       52		      .byte.b	#$52	;
-    294  f1bc		       52		      .byte.b	#$52	;
-    295  f1bd				   BallDudeTurningCol
-    296  f1bd		       00		      .byte.b	#$00
-    297  f1be		       5a		      .byte.b	#$5A	;
-    298  f1bf		       58		      .byte.b	#$58	;
-    299  f1c0		       56		      .byte.b	#$56	;
-    300  f1c1		       54		      .byte.b	#$54	;
-    301  f1c2		       54		      .byte.b	#$54	;
-    302  f1c3		       52		      .byte.b	#$52	;
-    303  f1c4		       52		      .byte.b	#$52	;
-    304  f1c5		       52		      .byte.b	#$52	;
-    305  f1c6				   AdrienCol
-    306  f1c6		       00		      .byte.b	#$00
-    307  f1c7		       16		      .byte.b	#$16	;
-    308  f1c8		       16		      .byte.b	#$16	;
-    309  f1c9		       18		      .byte.b	#$18	;
-    310  f1ca		       18		      .byte.b	#$18	;
-    311  f1cb		       1a		      .byte.b	#$1A	;
-    312  f1cc		       1a		      .byte.b	#$1A	;
-    313  f1cd		       1c		      .byte.b	#$1C	;
-    314  f1ce		       1c		      .byte.b	#$1C	;
-    315  f1cf
-    316  f1cf							; Complete ROM with 4kb
-    317  fffc					      org	$FFFC
-    318  fffc		       00 f0		      word.w	Reset
-    319  fffe		       00 f0		      word.w	Reset
+    246  f18e
+    247  f18e		       99 20 00 	      sta	HMP0,Y	; set fine position value
+    248  f191		       99 10 00 	      sta	RESP0,Y	; set coarse position value
+    249  f194		       60		      rts
+    250  f195
+    251  f195							; Sprites
+    252  f195				   BallDude
+    253  f195		       00		      .byte.b	#%00000000
+    254  f196		       7e		      .byte.b	#%01111110	;$5A
+    255  f197		       ff		      .byte.b	#%11111111	;$5A
+    256  f198		       ff		      .byte.b	#%11111111	;$58
+    257  f199		       ff		      .byte.b	#%11111111	;$56
+    258  f19a		       9f		      .byte.b	#%10011111	;$54
+    259  f19b		       db		      .byte.b	#%11011011	;$54
+    260  f19c		       fb		      .byte.b	#%11111011	;$52
+    261  f19d		       76		      .byte.b	#%01110110	;$52
+    262  f19e				   BallDudeTurning
+    263  f19e		       00		      .byte.b	#%00000000
+    264  f19f		       18		      .byte.b	#%00011000	;$5A
+    265  f1a0		       3c		      .byte.b	#%00111100	;$58
+    266  f1a1		       7e		      .byte.b	#%01111110	;$56
+    267  f1a2		       7e		      .byte.b	#%01111110	;$54
+    268  f1a3		       4a		      .byte.b	#%01001010	;$54
+    269  f1a4		       6a		      .byte.b	#%01101010	;$52
+    270  f1a5		       34		      .byte.b	#%00110100	;$52
+    271  f1a6		       18		      .byte.b	#%00011000	;$52
+    272  f1a7				   Adrien
+    273  f1a7		       00		      .byte.b	#%00000000
+    274  f1a8		       ff		      .byte.b	#%11111111	;$16
+    275  f1a9		       e7		      .byte.b	#%11100111	;$16
+    276  f1aa		       e7		      .byte.b	#%11100111	;$18
+    277  f1ab		       7e		      .byte.b	#%01111110	;$18
+    278  f1ac		       5a		      .byte.b	#%01011010	;$1A
+    279  f1ad		       3c		      .byte.b	#%00111100	;$1A
+    280  f1ae		       3c		      .byte.b	#%00111100	;$1C
+    281  f1af		       18		      .byte.b	#%00011000	;$1C
+    282  f1b0
+    283  f1b0				   BallDudeCol
+    284  f1b0		       00		      .byte.b	#$00
+    285  f1b1		       5a		      .byte.b	#$5A	;
+    286  f1b2		       58		      .byte.b	#$58	;
+    287  f1b3		       56		      .byte.b	#$56	;
+    288  f1b4		       54		      .byte.b	#$54	;
+    289  f1b5		       54		      .byte.b	#$54	;
+    290  f1b6		       52		      .byte.b	#$52	;
+    291  f1b7		       52		      .byte.b	#$52	;
+    292  f1b8		       52		      .byte.b	#$52	;
+    293  f1b9				   BallDudeTurningCol
+    294  f1b9		       00		      .byte.b	#$00
+    295  f1ba		       5a		      .byte.b	#$5A	;
+    296  f1bb		       58		      .byte.b	#$58	;
+    297  f1bc		       56		      .byte.b	#$56	;
+    298  f1bd		       54		      .byte.b	#$54	;
+    299  f1be		       54		      .byte.b	#$54	;
+    300  f1bf		       52		      .byte.b	#$52	;
+    301  f1c0		       52		      .byte.b	#$52	;
+    302  f1c1		       52		      .byte.b	#$52	;
+    303  f1c2				   AdrienCol
+    304  f1c2		       00		      .byte.b	#$00
+    305  f1c3		       16		      .byte.b	#$16	;
+    306  f1c4		       16		      .byte.b	#$16	;
+    307  f1c5		       18		      .byte.b	#$18	;
+    308  f1c6		       18		      .byte.b	#$18	;
+    309  f1c7		       1a		      .byte.b	#$1A	;
+    310  f1c8		       1a		      .byte.b	#$1A	;
+    311  f1c9		       1c		      .byte.b	#$1C	;
+    312  f1ca		       1c		      .byte.b	#$1C	;
+    313  f1cb
+    314  f1cb							; Complete ROM with 4kb
+    315  fffc					      org	$FFFC
+    316  fffc		       00 f0		      word.w	Reset
+    317  fffe		       00 f0		      word.w	Reset
