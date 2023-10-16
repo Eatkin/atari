@@ -471,7 +471,7 @@
     172  0000 ????						; EOF
 ------- FILE bomber.asm
       5  0000 ????
-      6 U008d ????				      seg.u	Variables
+      6 U008e ????				      seg.u	Variables
       7 U0080					      org	$80
       8 U0080
       9 U0080		       00	   JetXPos    byte.b
@@ -483,14 +483,15 @@
      15 U0088		       00 00	   BallDudeColPtr word.w
      16 U008a		       00 00	   AdrienColPtr word.w
      17 U008c		       00	   JetAnimOffset byte.b
-     18 U008d
-     19 U008d							; Define constants
-     20 U008d		       00 09	   SPRITE_HEIGHT =	9
-     21 U008d
-     22  10000 ????				       seg	Code
-     23  f000					      org	$F000
-     24  f000
-     25  f000				   Reset
+     18 U008d		       00	   Random     byte.b
+     19 U008e
+     20 U008e							; Define constants
+     21 U008e		       00 09	   SPRITE_HEIGHT =	9
+     22 U008e
+     23  10000 ????				       seg	Code
+     24  f000					      org	$F000
+     25  f000
+     26  f000				   Reset
       0  f000					      CLEAN_START
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -503,434 +504,464 @@
       9  f008		       48		      pha
      10  f009		       d0 fb		      bne	.CLEAR_STACK
      11  f00b
-     27  f00b
-     28  f00b							; Initialise RAM variables and TIA registers
-     29  f00b							; Set initial player coordinates
-     30  f00b		       a9 50		      lda	#80
-     31  f00d		       85 81		      sta	JetYPos
-     32  f00f		       a9 00		      lda	#0
-     33  f011		       85 80		      sta	JetXPos
-     34  f013
-     35  f013							; Set initial bomber coordinates
-     36  f013							; Basically just some random coordinates as placeholder lol
-     37  f013		       a9 53		      lda	#83
-     38  f015		       85 83		      sta	BomberYPos
-     39  f017		       a9 50		      lda	#80
-     40  f019		       85 82		      sta	BomberXPos
-     41  f01b
-     42  f01b							; Initialise sprite and palette pointers
-     43  f01b		       a9 95		      lda	#<BallDude
-     44  f01d		       85 84		      sta	BallDudePtr
-     45  f01f		       a9 f1		      lda	#>BallDude
-     46  f021		       85 85		      sta	BallDudePtr+1
-     47  f023
-     48  f023		       a9 a7		      lda	#<Adrien
-     49  f025		       85 86		      sta	AdrienPtr
-     50  f027		       a9 f1		      lda	#>Adrien
-     51  f029		       85 87		      sta	AdrienPtr+1
-     52  f02b
-     53  f02b		       a9 b0		      lda	#<BallDudeCol
-     54  f02d		       85 88		      sta	BallDudeColPtr
-     55  f02f		       a9 f1		      lda	#>BallDudeCol
-     56  f031		       85 89		      sta	BallDudeColPtr+1
-     57  f033
-     58  f033		       a9 c2		      lda	#<AdrienCol
-     59  f035		       85 8a		      sta	AdrienColPtr
-     60  f037		       a9 f1		      lda	#>AdrienCol
-     61  f039		       85 8b		      sta	AdrienColPtr+1
-     62  f03b
-     63  f03b							; Begin rendering
-     64  f03b				   StartFrame
-     65  f03b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     66  f03b							; Pre-vblank calculations
-     67  f03b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     68  f03b		       a5 80		      lda	JetXPos
-     69  f03d		       a0 00		      ldy	#0	; Corresponds to P0
-     70  f03f		       20 81 f1 	      jsr	SetObjXPos
-     71  f042
-     72  f042		       a5 82		      lda	BomberXPos
-     73  f044		       a0 01		      ldy	#1	; Corresponds to p1
-     74  f046		       20 81 f1 	      jsr	SetObjXPos
-     75  f049
-     76  f049							; Poke registers
-     77  f049		       85 02		      sta	WSYNC
-     78  f04b		       85 2a		      sta	HMOVE
-     79  f04d
-     80  f04d							; Turn on vblank and vsync
-     81  f04d		       a2 02		      ldx	#2
-     82  f04f		       86 01		      stx	VBLANK
-     83  f051		       86 00		      stx	VSYNC
-     84  f053					      REPEAT	3
-     85  f053		       86 02		      stx	WSYNC
-     84  f053					      REPEND
-     85  f055		       86 02		      stx	WSYNC
-     84  f055					      REPEND
-     85  f057		       86 02		      stx	WSYNC
-     86  f059					      REPEND
-     87  f059							; Turn off vsync
-     88  f059		       a2 00		      ldx	#0
-     89  f05b		       86 00		      stx	VSYNC
-     90  f05d
-     91  f05d							; Render VBLANK
-     92  f05d					      REPEAT	37
-     93  f05d		       86 02		      stx	WSYNC
-     92  f05d					      REPEND
-     93  f05f		       86 02		      stx	WSYNC
-     92  f05f					      REPEND
-     93  f061		       86 02		      stx	WSYNC
-     92  f061					      REPEND
-     93  f063		       86 02		      stx	WSYNC
-     92  f063					      REPEND
-     93  f065		       86 02		      stx	WSYNC
-     92  f065					      REPEND
-     93  f067		       86 02		      stx	WSYNC
-     92  f067					      REPEND
-     93  f069		       86 02		      stx	WSYNC
-     92  f069					      REPEND
-     93  f06b		       86 02		      stx	WSYNC
-     92  f06b					      REPEND
-     93  f06d		       86 02		      stx	WSYNC
-     92  f06d					      REPEND
-     93  f06f		       86 02		      stx	WSYNC
-     92  f06f					      REPEND
-     93  f071		       86 02		      stx	WSYNC
-     92  f071					      REPEND
-     93  f073		       86 02		      stx	WSYNC
-     92  f073					      REPEND
-     93  f075		       86 02		      stx	WSYNC
-     92  f075					      REPEND
-     93  f077		       86 02		      stx	WSYNC
-     92  f077					      REPEND
-     93  f079		       86 02		      stx	WSYNC
-     92  f079					      REPEND
-     93  f07b		       86 02		      stx	WSYNC
-     92  f07b					      REPEND
-     93  f07d		       86 02		      stx	WSYNC
-     92  f07d					      REPEND
-     93  f07f		       86 02		      stx	WSYNC
-     92  f07f					      REPEND
-     93  f081		       86 02		      stx	WSYNC
-     92  f081					      REPEND
-     93  f083		       86 02		      stx	WSYNC
-     92  f083					      REPEND
-     93  f085		       86 02		      stx	WSYNC
-     92  f085					      REPEND
-     93  f087		       86 02		      stx	WSYNC
-     92  f087					      REPEND
-     93  f089		       86 02		      stx	WSYNC
-     92  f089					      REPEND
-     93  f08b		       86 02		      stx	WSYNC
-     92  f08b					      REPEND
-     93  f08d		       86 02		      stx	WSYNC
-     92  f08d					      REPEND
-     93  f08f		       86 02		      stx	WSYNC
-     92  f08f					      REPEND
-     93  f091		       86 02		      stx	WSYNC
-     92  f091					      REPEND
-     93  f093		       86 02		      stx	WSYNC
-     92  f093					      REPEND
-     93  f095		       86 02		      stx	WSYNC
-     92  f095					      REPEND
-     93  f097		       86 02		      stx	WSYNC
-     92  f097					      REPEND
-     93  f099		       86 02		      stx	WSYNC
-     92  f099					      REPEND
-     93  f09b		       86 02		      stx	WSYNC
-     92  f09b					      REPEND
-     93  f09d		       86 02		      stx	WSYNC
-     92  f09d					      REPEND
-     93  f09f		       86 02		      stx	WSYNC
-     92  f09f					      REPEND
-     93  f0a1		       86 02		      stx	WSYNC
-     92  f0a1					      REPEND
-     93  f0a3		       86 02		      stx	WSYNC
-     92  f0a3					      REPEND
-     93  f0a5		       86 02		      stx	WSYNC
-     94  f0a7					      REPEND
-     95  f0a7							; Turn off VBLANK
-     96  f0a7		       86 01		      stx	VBLANK
-     97  f0a9
-     98  f0a9							; Render the visible scanlines
-     99  f0a9				   VisibleScanlines
-    100  f0a9							; Set background colour
-    101  f0a9		       a9 84		      lda	#$84	; Blue
-    102  f0ab		       85 09		      sta	COLUBK
-    103  f0ad							; Set playfield colour
-    104  f0ad		       a9 c2		      lda	#$C2
-    105  f0af		       85 08		      sta	COLUPF
-    106  f0b1
-    107  f0b1							; Setup playfield
-    108  f0b1		       a9 f0		      lda	#%11110000	; PF0 uses first 4 bits and is reversed
-    109  f0b3		       85 0d		      sta	PF0
-    110  f0b5		       a9 c0		      lda	#%11000000
-    111  f0b7		       85 0e		      sta	PF1
-    112  f0b9		       a9 00		      lda	#0
-    113  f0bb		       85 0f		      sta	PF2
-    114  f0bd
-    115  f0bd							; Playfield reflection
-    116  f0bd		       a9 01		      lda	#%00000001
-    117  f0bf		       85 0a		      sta	CTRLPF
-    118  f0c1
-    119  f0c1		       a2 60		      ldx	#96
-    120  f0c3
-    121  f0c3							; Render the 96 visible scanline
-    122  f0c3							; Using a 2 line kernel
-    123  f0c3				   .GameLineLoop
-    124  f0c3				   .InsideBallDude
-    125  f0c3		       8a		      txa
-    126  f0c4		       38		      sec
-    127  f0c5		       e5 81		      sbc	JetYPos
-    128  f0c7		       c5 09		      cmp	SPRITE_HEIGHT
-    129  f0c9		       90 02		      bcc	.DrawSpriteP0
-    130  f0cb		       a9 00		      lda	#0
-    131  f0cd
-    132  f0cd				   .DrawSpriteP0
-    133  f0cd		       18		      clc
-    134  f0ce		       65 8c		      adc	JetAnimOffset
-    135  f0d0		       a8		      tay
-    136  f0d1		       b1 84		      lda	(BallDudePtr),Y	; Y register is only register that can work with pointers
-    137  f0d3		       85 02		      sta	WSYNC	; Wait for scanline
-    138  f0d5		       85 1b		      sta	GRP0	; Set graphics for P0
-    139  f0d7		       b1 88		      lda	(BallDudeColPtr),Y
-    140  f0d9		       85 06		      sta	COLUP0
-    141  f0db
-    142  f0db				   .InsideAdrien
-    143  f0db		       8a		      txa
-    144  f0dc		       38		      sec
-    145  f0dd		       e5 83		      sbc	BomberYPos
-    146  f0df		       c5 09		      cmp	SPRITE_HEIGHT
-    147  f0e1		       90 02		      bcc	.DrawSpriteP1
-    148  f0e3		       a9 00		      lda	#0
-    149  f0e5
-    150  f0e5				   .DrawSpriteP1
-    151  f0e5		       a8		      tay
-    152  f0e6
-    153  f0e6							; Set Adrien to be thicc because it'll be funny idk
-    154  f0e6		       a9 07		      lda	#%00000111
-    155  f0e8		       85 05		      sta	NUSIZ1
-    156  f0ea		       98		      tya
-    157  f0eb
-    158  f0eb		       b1 86		      lda	(AdrienPtr),Y	; Y register is only register that can work with pointers
-    159  f0ed		       85 02		      sta	WSYNC	; Wait for scanline
-    160  f0ef		       85 1c		      sta	GRP1	; Set graphics for P0
-    161  f0f1		       b1 8a		      lda	(AdrienColPtr),Y
-    162  f0f3		       85 07		      sta	COLUP1
-    163  f0f5
-    164  f0f5		       ca		      dex
-    165  f0f6		       d0 cb		      bne	.GameLineLoop
-    166  f0f8
-    167  f0f8							; Display vblank
-    168  f0f8				   Overscan
-    169  f0f8		       a9 02		      lda	#2
-    170  f0fa		       85 01		      sta	VBLANK
-    171  f0fc					      REPEAT	30
-    172  f0fc		       85 02		      sta	WSYNC
-    171  f0fc					      REPEND
-    172  f0fe		       85 02		      sta	WSYNC
-    171  f0fe					      REPEND
-    172  f100		       85 02		      sta	WSYNC
-    171  f100					      REPEND
-    172  f102		       85 02		      sta	WSYNC
-    171  f102					      REPEND
-    172  f104		       85 02		      sta	WSYNC
-    171  f104					      REPEND
-    172  f106		       85 02		      sta	WSYNC
-    171  f106					      REPEND
-    172  f108		       85 02		      sta	WSYNC
-    171  f108					      REPEND
-    172  f10a		       85 02		      sta	WSYNC
-    171  f10a					      REPEND
-    172  f10c		       85 02		      sta	WSYNC
-    171  f10c					      REPEND
-    172  f10e		       85 02		      sta	WSYNC
-    171  f10e					      REPEND
-    172  f110		       85 02		      sta	WSYNC
-    171  f110					      REPEND
-    172  f112		       85 02		      sta	WSYNC
-    171  f112					      REPEND
-    172  f114		       85 02		      sta	WSYNC
-    171  f114					      REPEND
-    172  f116		       85 02		      sta	WSYNC
-    171  f116					      REPEND
-    172  f118		       85 02		      sta	WSYNC
-    171  f118					      REPEND
-    172  f11a		       85 02		      sta	WSYNC
-    171  f11a					      REPEND
-    172  f11c		       85 02		      sta	WSYNC
-    171  f11c					      REPEND
-    172  f11e		       85 02		      sta	WSYNC
-    171  f11e					      REPEND
-    172  f120		       85 02		      sta	WSYNC
-    171  f120					      REPEND
-    172  f122		       85 02		      sta	WSYNC
-    171  f122					      REPEND
-    172  f124		       85 02		      sta	WSYNC
-    171  f124					      REPEND
-    172  f126		       85 02		      sta	WSYNC
-    171  f126					      REPEND
-    172  f128		       85 02		      sta	WSYNC
-    171  f128					      REPEND
-    172  f12a		       85 02		      sta	WSYNC
-    171  f12a					      REPEND
-    172  f12c		       85 02		      sta	WSYNC
-    171  f12c					      REPEND
-    172  f12e		       85 02		      sta	WSYNC
-    171  f12e					      REPEND
-    172  f130		       85 02		      sta	WSYNC
-    171  f130					      REPEND
-    172  f132		       85 02		      sta	WSYNC
-    171  f132					      REPEND
-    172  f134		       85 02		      sta	WSYNC
-    171  f134					      REPEND
-    172  f136		       85 02		      sta	WSYNC
-    173  f138					      REPEND
-    174  f138
-    175  f138		       a9 00		      lda	#0
-    176  f13a		       85 01		      sta	VBLANK
+     28  f00b
+     29  f00b							; Initialise RAM variables and TIA registers
+     30  f00b							; Set initial player coordinates
+     31  f00b		       a9 50		      lda	#80
+     32  f00d		       85 81		      sta	JetYPos
+     33  f00f		       a9 00		      lda	#0
+     34  f011		       85 80		      sta	JetXPos
+     35  f013
+     36  f013							; Set initial bomber coordinates
+     37  f013							; Basically just some random coordinates as placeholder lol
+     38  f013		       a9 53		      lda	#83
+     39  f015		       85 83		      sta	BomberYPos
+     40  f017		       a9 50		      lda	#80
+     41  f019		       85 82		      sta	BomberXPos
+     42  f01b		       a9 d4		      lda	#%11010100
+     43  f01d		       85 8d		      sta	Random
+     44  f01f
+     45  f01f							; Initialise sprite and palette pointers
+     46  f01f		       a9 b6		      lda	#<BallDude
+     47  f021		       85 84		      sta	BallDudePtr
+     48  f023		       a9 f1		      lda	#>BallDude
+     49  f025		       85 85		      sta	BallDudePtr+1
+     50  f027
+     51  f027		       a9 c8		      lda	#<Adrien
+     52  f029		       85 86		      sta	AdrienPtr
+     53  f02b		       a9 f1		      lda	#>Adrien
+     54  f02d		       85 87		      sta	AdrienPtr+1
+     55  f02f
+     56  f02f		       a9 d1		      lda	#<BallDudeCol
+     57  f031		       85 88		      sta	BallDudeColPtr
+     58  f033		       a9 f1		      lda	#>BallDudeCol
+     59  f035		       85 89		      sta	BallDudeColPtr+1
+     60  f037
+     61  f037		       a9 e3		      lda	#<AdrienCol
+     62  f039		       85 8a		      sta	AdrienColPtr
+     63  f03b		       a9 f1		      lda	#>AdrienCol
+     64  f03d		       85 8b		      sta	AdrienColPtr+1
+     65  f03f
+     66  f03f							; Begin rendering
+     67  f03f				   StartFrame
+     68  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     69  f03f							; Pre-vblank calculations
+     70  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     71  f03f		       a5 80		      lda	JetXPos
+     72  f041		       a0 00		      ldy	#0	; Corresponds to P0
+     73  f043		       20 84 f1 	      jsr	SetObjXPos
+     74  f046
+     75  f046		       a5 82		      lda	BomberXPos
+     76  f048		       a0 01		      ldy	#1	; Corresponds to p1
+     77  f04a		       20 84 f1 	      jsr	SetObjXPos
+     78  f04d
+     79  f04d							; Poke registers
+     80  f04d		       85 02		      sta	WSYNC
+     81  f04f		       85 2a		      sta	HMOVE
+     82  f051
+     83  f051							; Turn on vblank and vsync
+     84  f051		       a2 02		      ldx	#2
+     85  f053		       86 01		      stx	VBLANK
+     86  f055		       86 00		      stx	VSYNC
+     87  f057					      REPEAT	3
+     88  f057		       86 02		      stx	WSYNC
+     87  f057					      REPEND
+     88  f059		       86 02		      stx	WSYNC
+     87  f059					      REPEND
+     88  f05b		       86 02		      stx	WSYNC
+     89  f05d					      REPEND
+     90  f05d							; Turn off vsync
+     91  f05d		       a2 00		      ldx	#0
+     92  f05f		       86 00		      stx	VSYNC
+     93  f061
+     94  f061							; Render VBLANK
+     95  f061					      REPEAT	37
+     96  f061		       86 02		      stx	WSYNC
+     95  f061					      REPEND
+     96  f063		       86 02		      stx	WSYNC
+     95  f063					      REPEND
+     96  f065		       86 02		      stx	WSYNC
+     95  f065					      REPEND
+     96  f067		       86 02		      stx	WSYNC
+     95  f067					      REPEND
+     96  f069		       86 02		      stx	WSYNC
+     95  f069					      REPEND
+     96  f06b		       86 02		      stx	WSYNC
+     95  f06b					      REPEND
+     96  f06d		       86 02		      stx	WSYNC
+     95  f06d					      REPEND
+     96  f06f		       86 02		      stx	WSYNC
+     95  f06f					      REPEND
+     96  f071		       86 02		      stx	WSYNC
+     95  f071					      REPEND
+     96  f073		       86 02		      stx	WSYNC
+     95  f073					      REPEND
+     96  f075		       86 02		      stx	WSYNC
+     95  f075					      REPEND
+     96  f077		       86 02		      stx	WSYNC
+     95  f077					      REPEND
+     96  f079		       86 02		      stx	WSYNC
+     95  f079					      REPEND
+     96  f07b		       86 02		      stx	WSYNC
+     95  f07b					      REPEND
+     96  f07d		       86 02		      stx	WSYNC
+     95  f07d					      REPEND
+     96  f07f		       86 02		      stx	WSYNC
+     95  f07f					      REPEND
+     96  f081		       86 02		      stx	WSYNC
+     95  f081					      REPEND
+     96  f083		       86 02		      stx	WSYNC
+     95  f083					      REPEND
+     96  f085		       86 02		      stx	WSYNC
+     95  f085					      REPEND
+     96  f087		       86 02		      stx	WSYNC
+     95  f087					      REPEND
+     96  f089		       86 02		      stx	WSYNC
+     95  f089					      REPEND
+     96  f08b		       86 02		      stx	WSYNC
+     95  f08b					      REPEND
+     96  f08d		       86 02		      stx	WSYNC
+     95  f08d					      REPEND
+     96  f08f		       86 02		      stx	WSYNC
+     95  f08f					      REPEND
+     96  f091		       86 02		      stx	WSYNC
+     95  f091					      REPEND
+     96  f093		       86 02		      stx	WSYNC
+     95  f093					      REPEND
+     96  f095		       86 02		      stx	WSYNC
+     95  f095					      REPEND
+     96  f097		       86 02		      stx	WSYNC
+     95  f097					      REPEND
+     96  f099		       86 02		      stx	WSYNC
+     95  f099					      REPEND
+     96  f09b		       86 02		      stx	WSYNC
+     95  f09b					      REPEND
+     96  f09d		       86 02		      stx	WSYNC
+     95  f09d					      REPEND
+     96  f09f		       86 02		      stx	WSYNC
+     95  f09f					      REPEND
+     96  f0a1		       86 02		      stx	WSYNC
+     95  f0a1					      REPEND
+     96  f0a3		       86 02		      stx	WSYNC
+     95  f0a3					      REPEND
+     96  f0a5		       86 02		      stx	WSYNC
+     95  f0a5					      REPEND
+     96  f0a7		       86 02		      stx	WSYNC
+     95  f0a7					      REPEND
+     96  f0a9		       86 02		      stx	WSYNC
+     97  f0ab					      REPEND
+     98  f0ab							; Turn off VBLANK
+     99  f0ab		       86 01		      stx	VBLANK
+    100  f0ad
+    101  f0ad							; Render the visible scanlines
+    102  f0ad				   VisibleScanlines
+    103  f0ad							; Set background colour
+    104  f0ad		       a9 84		      lda	#$84	; Blue
+    105  f0af		       85 09		      sta	COLUBK
+    106  f0b1							; Set playfield colour
+    107  f0b1		       a9 c2		      lda	#$C2
+    108  f0b3		       85 08		      sta	COLUPF
+    109  f0b5
+    110  f0b5							; Setup playfield
+    111  f0b5		       a9 f0		      lda	#%11110000	; PF0 uses first 4 bits and is reversed
+    112  f0b7		       85 0d		      sta	PF0
+    113  f0b9		       a9 c0		      lda	#%11000000
+    114  f0bb		       85 0e		      sta	PF1
+    115  f0bd		       a9 00		      lda	#0
+    116  f0bf		       85 0f		      sta	PF2
+    117  f0c1
+    118  f0c1							; Playfield reflection
+    119  f0c1		       a9 01		      lda	#%00000001
+    120  f0c3		       85 0a		      sta	CTRLPF
+    121  f0c5
+    122  f0c5		       a2 60		      ldx	#96
+    123  f0c7
+    124  f0c7							; Render the 96 visible scanline
+    125  f0c7							; Using a 2 line kernel
+    126  f0c7				   .GameLineLoop
+    127  f0c7				   .InsideBallDude
+    128  f0c7		       8a		      txa
+    129  f0c8		       38		      sec
+    130  f0c9		       e5 81		      sbc	JetYPos
+    131  f0cb		       c5 09		      cmp	SPRITE_HEIGHT
+    132  f0cd		       90 02		      bcc	.DrawSpriteP0
+    133  f0cf		       a9 00		      lda	#0
+    134  f0d1
+    135  f0d1				   .DrawSpriteP0
+    136  f0d1		       18		      clc
+    137  f0d2		       65 8c		      adc	JetAnimOffset
+    138  f0d4		       a8		      tay
+    139  f0d5		       b1 84		      lda	(BallDudePtr),Y	; Y register is only register that can work with pointers
+    140  f0d7		       85 02		      sta	WSYNC	; Wait for scanline
+    141  f0d9		       85 1b		      sta	GRP0	; Set graphics for P0
+    142  f0db		       b1 88		      lda	(BallDudeColPtr),Y
+    143  f0dd		       85 06		      sta	COLUP0
+    144  f0df
+    145  f0df				   .InsideAdrien
+    146  f0df		       8a		      txa
+    147  f0e0		       38		      sec
+    148  f0e1		       e5 83		      sbc	BomberYPos
+    149  f0e3		       c5 09		      cmp	SPRITE_HEIGHT
+    150  f0e5		       90 02		      bcc	.DrawSpriteP1
+    151  f0e7		       a9 00		      lda	#0
+    152  f0e9
+    153  f0e9				   .DrawSpriteP1
+    154  f0e9		       a8		      tay
+    155  f0ea
+    156  f0ea							; Set Adrien to be thicc because it'll be funny idk
+    157  f0ea		       a9 07		      lda	#%00000111
+    158  f0ec		       85 05		      sta	NUSIZ1
+    159  f0ee		       98		      tya
+    160  f0ef
+    161  f0ef		       b1 86		      lda	(AdrienPtr),Y	; Y register is only register that can work with pointers
+    162  f0f1		       85 02		      sta	WSYNC	; Wait for scanline
+    163  f0f3		       85 1c		      sta	GRP1	; Set graphics for P0
+    164  f0f5		       b1 8a		      lda	(AdrienColPtr),Y
+    165  f0f7		       85 07		      sta	COLUP1
+    166  f0f9
+    167  f0f9		       ca		      dex
+    168  f0fa		       d0 cb		      bne	.GameLineLoop
+    169  f0fc
+    170  f0fc							; Display vblank
+    171  f0fc				   Overscan
+    172  f0fc		       a9 02		      lda	#2
+    173  f0fe		       85 01		      sta	VBLANK
+    174  f100					      REPEAT	30
+    175  f100		       85 02		      sta	WSYNC
+    174  f100					      REPEND
+    175  f102		       85 02		      sta	WSYNC
+    174  f102					      REPEND
+    175  f104		       85 02		      sta	WSYNC
+    174  f104					      REPEND
+    175  f106		       85 02		      sta	WSYNC
+    174  f106					      REPEND
+    175  f108		       85 02		      sta	WSYNC
+    174  f108					      REPEND
+    175  f10a		       85 02		      sta	WSYNC
+    174  f10a					      REPEND
+    175  f10c		       85 02		      sta	WSYNC
+    174  f10c					      REPEND
+    175  f10e		       85 02		      sta	WSYNC
+    174  f10e					      REPEND
+    175  f110		       85 02		      sta	WSYNC
+    174  f110					      REPEND
+    175  f112		       85 02		      sta	WSYNC
+    174  f112					      REPEND
+    175  f114		       85 02		      sta	WSYNC
+    174  f114					      REPEND
+    175  f116		       85 02		      sta	WSYNC
+    174  f116					      REPEND
+    175  f118		       85 02		      sta	WSYNC
+    174  f118					      REPEND
+    175  f11a		       85 02		      sta	WSYNC
+    174  f11a					      REPEND
+    175  f11c		       85 02		      sta	WSYNC
+    174  f11c					      REPEND
+    175  f11e		       85 02		      sta	WSYNC
+    174  f11e					      REPEND
+    175  f120		       85 02		      sta	WSYNC
+    174  f120					      REPEND
+    175  f122		       85 02		      sta	WSYNC
+    174  f122					      REPEND
+    175  f124		       85 02		      sta	WSYNC
+    174  f124					      REPEND
+    175  f126		       85 02		      sta	WSYNC
+    174  f126					      REPEND
+    175  f128		       85 02		      sta	WSYNC
+    174  f128					      REPEND
+    175  f12a		       85 02		      sta	WSYNC
+    174  f12a					      REPEND
+    175  f12c		       85 02		      sta	WSYNC
+    174  f12c					      REPEND
+    175  f12e		       85 02		      sta	WSYNC
+    174  f12e					      REPEND
+    175  f130		       85 02		      sta	WSYNC
+    174  f130					      REPEND
+    175  f132		       85 02		      sta	WSYNC
+    174  f132					      REPEND
+    175  f134		       85 02		      sta	WSYNC
+    174  f134					      REPEND
+    175  f136		       85 02		      sta	WSYNC
+    174  f136					      REPEND
+    175  f138		       85 02		      sta	WSYNC
+    174  f138					      REPEND
+    175  f13a		       85 02		      sta	WSYNC
+    176  f13c					      REPEND
     177  f13c
-    178  f13c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    179  f13c							; Joystick input
-    180  f13c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    181  f13c		       a6 80		      ldx	JetXPos
-    182  f13e				   CheckP0Up
-    183  f13e		       a9 10		      lda	#%00010000
-    184  f140		       2c 80 02 	      bit	SWCHA
-    185  f143		       d0 02		      bne	CheckP0Down
-    186  f145		       e6 81		      inc	JetYPos
-    187  f147				   CheckP0Down
-    188  f147		       a9 20		      lda	#%00100000
-    189  f149		       2c 80 02 	      bit	SWCHA
-    190  f14c		       d0 02		      bne	CheckP0Left
-    191  f14e		       c6 81		      dec	JetYPos
-    192  f150				   CheckP0Left
-    193  f150		       a9 40		      lda	#%01000000
-    194  f152		       2c 80 02 	      bit	SWCHA
-    195  f155		       d0 02		      bne	CheckP0Right
-    196  f157		       c6 80		      dec	JetXPos
-    197  f159				   CheckP0Right
-    198  f159		       a9 80		      lda	#%10000000
-    199  f15b		       2c 80 02 	      bit	SWCHA
-    200  f15e		       d0 02		      bne	NoInput
-    201  f160		       e6 80		      inc	JetXPos
-    202  f162				   NoInput
-    203  f162		       a9 00		      lda	#0
-    204  f164		       85 8c		      sta	JetAnimOffset
-    205  f166		       e4 80		      cpx	JetXPos
-    206  f168		       f0 04		      beq	NoChange
-    207  f16a							; Set the sprite pointer to BallDude Turning
-    208  f16a		       a5 09		      lda	SPRITE_HEIGHT
-    209  f16c		       85 8c		      sta	JetAnimOffset
-    210  f16e				   NoChange
-    211  f16e
-    212  f16e				   UpdateBomberPosition
-    213  f16e		       18		      clc
-    214  f16f		       a5 83		      lda	BomberYPos
-    215  f171		       c9 00		      cmp	#0
-    216  f173		       30 05		      bmi	.ResetBomberPosition
-    217  f175
-    218  f175		       c6 83		      dec	BomberYPos
-    219  f177		       4c 7e f1 	      jmp	EndPositionUpdate
-    220  f17a
-    221  f17a				   .ResetBomberPosition
-    222  f17a		       a9 60		      lda	#96
-    223  f17c		       85 83		      sta	BomberYPos
-    224  f17e
-    225  f17e				   EndPositionUpdate
-    226  f17e
-    227  f17e							; Loop forever
-    228  f17e		       4c 3b f0 	      jmp	StartFrame
-    229  f181
-    230  f181							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    231  f181							; accumulator contains x-posiiton
-    232  f181							; y register contains object (0:player0, 1:player1, 2:missile0, 3:missile1, 4:ball)
-    233  f181							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    234  f181				   SetObjXPos subroutine
-    235  f181		       85 02		      sta	WSYNC
-    236  f183		       38		      sec
-    237  f184				   .DivideLoop
-    238  f184		       e9 0f		      sbc	#15
-    239  f186		       b0 fc		      bcs	.DivideLoop	; loop while carry is set
-    240  f188
-    241  f188		       49 07		      eor	#7	; exclusive OR with accumulator
-    242  f18a							; A will be between -8 and 7
-    243  f18a					      REPEAT	4
-    244  f18a		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
-    243  f18a					      REPEND
-    244  f18b		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
-    243  f18b					      REPEND
-    244  f18c		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
-    243  f18c					      REPEND
-    244  f18d		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    178  f13c		       a9 00		      lda	#0
+    179  f13e		       85 01		      sta	VBLANK
+    180  f140
+    181  f140							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    182  f140							; Joystick input
+    183  f140							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    184  f140		       a6 80		      ldx	JetXPos
+    185  f142				   CheckP0Up
+    186  f142		       a9 10		      lda	#%00010000
+    187  f144		       2c 80 02 	      bit	SWCHA
+    188  f147		       d0 02		      bne	CheckP0Down
+    189  f149		       e6 81		      inc	JetYPos
+    190  f14b				   CheckP0Down
+    191  f14b		       a9 20		      lda	#%00100000
+    192  f14d		       2c 80 02 	      bit	SWCHA
+    193  f150		       d0 02		      bne	CheckP0Left
+    194  f152		       c6 81		      dec	JetYPos
+    195  f154				   CheckP0Left
+    196  f154		       a9 40		      lda	#%01000000
+    197  f156		       2c 80 02 	      bit	SWCHA
+    198  f159		       d0 02		      bne	CheckP0Right
+    199  f15b		       c6 80		      dec	JetXPos
+    200  f15d				   CheckP0Right
+    201  f15d		       a9 80		      lda	#%10000000
+    202  f15f		       2c 80 02 	      bit	SWCHA
+    203  f162		       d0 02		      bne	NoInput
+    204  f164		       e6 80		      inc	JetXPos
+    205  f166				   NoInput
+    206  f166		       a9 00		      lda	#0
+    207  f168		       85 8c		      sta	JetAnimOffset
+    208  f16a		       e4 80		      cpx	JetXPos
+    209  f16c		       f0 04		      beq	NoChange
+    210  f16e							; Set the sprite pointer to BallDude Turning
+    211  f16e		       a5 09		      lda	SPRITE_HEIGHT
+    212  f170		       85 8c		      sta	JetAnimOffset
+    213  f172				   NoChange
+    214  f172
+    215  f172				   UpdateBomberPosition
+    216  f172		       18		      clc
+    217  f173		       a5 83		      lda	BomberYPos
+    218  f175		       c9 00		      cmp	#0
+    219  f177		       30 05		      bmi	.ResetBomberPosition
+    220  f179
+    221  f179		       c6 83		      dec	BomberYPos
+    222  f17b		       4c 81 f1 	      jmp	EndPositionUpdate
+    223  f17e
+    224  f17e				   .ResetBomberPosition
+    225  f17e		       20 98 f1 	      jsr	SpawnBomber
+    226  f181
+    227  f181				   EndPositionUpdate
+    228  f181
+    229  f181							; Loop forever
+    230  f181		       4c 3f f0 	      jmp	StartFrame
+    231  f184
+    232  f184							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    233  f184							; accumulator contains x-posiiton
+    234  f184							; y register contains object (0:player0, 1:player1, 2:missile0, 3:missile1, 4:ball)
+    235  f184							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    236  f184				   SetObjXPos subroutine
+    237  f184		       85 02		      sta	WSYNC
+    238  f186		       38		      sec
+    239  f187				   .DivideLoop
+    240  f187		       e9 0f		      sbc	#15
+    241  f189		       b0 fc		      bcs	.DivideLoop	; loop while carry is set
+    242  f18b
+    243  f18b		       49 07		      eor	#7	; exclusive OR with accumulator
+    244  f18d							; A will be between -8 and 7
+    245  f18d					      REPEAT	4
+    246  f18d		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    245  f18d					      REPEND
+    246  f18e		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
     245  f18e					      REPEND
-    246  f18e
-    247  f18e		       99 20 00 	      sta	HMP0,Y	; set fine position value
-    248  f191		       99 10 00 	      sta	RESP0,Y	; set coarse position value
-    249  f194		       60		      rts
-    250  f195
-    251  f195							; Sprites
-    252  f195				   BallDude
-    253  f195		       00		      .byte.b	#%00000000
-    254  f196		       7e		      .byte.b	#%01111110	;$5A
-    255  f197		       ff		      .byte.b	#%11111111	;$5A
-    256  f198		       ff		      .byte.b	#%11111111	;$58
-    257  f199		       ff		      .byte.b	#%11111111	;$56
-    258  f19a		       9f		      .byte.b	#%10011111	;$54
-    259  f19b		       db		      .byte.b	#%11011011	;$54
-    260  f19c		       fb		      .byte.b	#%11111011	;$52
-    261  f19d		       76		      .byte.b	#%01110110	;$52
-    262  f19e				   BallDudeTurning
-    263  f19e		       00		      .byte.b	#%00000000
-    264  f19f		       18		      .byte.b	#%00011000	;$5A
-    265  f1a0		       3c		      .byte.b	#%00111100	;$58
-    266  f1a1		       7e		      .byte.b	#%01111110	;$56
-    267  f1a2		       7e		      .byte.b	#%01111110	;$54
-    268  f1a3		       4a		      .byte.b	#%01001010	;$54
-    269  f1a4		       6a		      .byte.b	#%01101010	;$52
-    270  f1a5		       34		      .byte.b	#%00110100	;$52
-    271  f1a6		       18		      .byte.b	#%00011000	;$52
-    272  f1a7				   Adrien
-    273  f1a7		       00		      .byte.b	#%00000000
-    274  f1a8		       ff		      .byte.b	#%11111111	;$16
-    275  f1a9		       e7		      .byte.b	#%11100111	;$16
-    276  f1aa		       e7		      .byte.b	#%11100111	;$18
-    277  f1ab		       7e		      .byte.b	#%01111110	;$18
-    278  f1ac		       5a		      .byte.b	#%01011010	;$1A
-    279  f1ad		       3c		      .byte.b	#%00111100	;$1A
-    280  f1ae		       3c		      .byte.b	#%00111100	;$1C
-    281  f1af		       18		      .byte.b	#%00011000	;$1C
-    282  f1b0
-    283  f1b0				   BallDudeCol
-    284  f1b0		       00		      .byte.b	#$00
-    285  f1b1		       5a		      .byte.b	#$5A	;
-    286  f1b2		       58		      .byte.b	#$58	;
-    287  f1b3		       56		      .byte.b	#$56	;
-    288  f1b4		       54		      .byte.b	#$54	;
-    289  f1b5		       54		      .byte.b	#$54	;
-    290  f1b6		       52		      .byte.b	#$52	;
-    291  f1b7		       52		      .byte.b	#$52	;
-    292  f1b8		       52		      .byte.b	#$52	;
-    293  f1b9				   BallDudeTurningCol
-    294  f1b9		       00		      .byte.b	#$00
-    295  f1ba		       5a		      .byte.b	#$5A	;
-    296  f1bb		       58		      .byte.b	#$58	;
-    297  f1bc		       56		      .byte.b	#$56	;
-    298  f1bd		       54		      .byte.b	#$54	;
-    299  f1be		       54		      .byte.b	#$54	;
-    300  f1bf		       52		      .byte.b	#$52	;
-    301  f1c0		       52		      .byte.b	#$52	;
-    302  f1c1		       52		      .byte.b	#$52	;
-    303  f1c2				   AdrienCol
-    304  f1c2		       00		      .byte.b	#$00
-    305  f1c3		       16		      .byte.b	#$16	;
-    306  f1c4		       16		      .byte.b	#$16	;
-    307  f1c5		       18		      .byte.b	#$18	;
-    308  f1c6		       18		      .byte.b	#$18	;
-    309  f1c7		       1a		      .byte.b	#$1A	;
-    310  f1c8		       1a		      .byte.b	#$1A	;
-    311  f1c9		       1c		      .byte.b	#$1C	;
-    312  f1ca		       1c		      .byte.b	#$1C	;
-    313  f1cb
-    314  f1cb							; Complete ROM with 4kb
-    315  fffc					      org	$FFFC
-    316  fffc		       00 f0		      word.w	Reset
-    317  fffe		       00 f0		      word.w	Reset
+    246  f18f		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    245  f18f					      REPEND
+    246  f190		       0a		      asl		; bitshift a, HMP0 uses only 4 bits
+    247  f191					      REPEND
+    248  f191
+    249  f191		       99 20 00 	      sta	HMP0,Y	; set fine position value
+    250  f194		       99 10 00 	      sta	RESP0,Y	; set coarse position value
+    251  f197		       60		      rts
+    252  f198
+    253  f198							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    254  f198							; generate random number using LFSR
+    255  f198							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    256  f198				   SpawnBomber subroutine
+    257  f198							; The LFSR
+    258  f198		       a5 8d		      lda	Random
+    259  f19a		       0a		      asl
+    260  f19b		       45 8d		      eor	Random
+    261  f19d		       0a		      asl
+    262  f19e		       45 8d		      eor	Random
+    263  f1a0		       0a		      asl
+    264  f1a1		       0a		      asl
+    265  f1a2		       45 8d		      eor	Random
+    266  f1a4		       0a		      asl
+    267  f1a5		       26 8d		      rol	Random
+    268  f1a7
+    269  f1a7							; Divide by 4 to match playfield size
+    270  f1a7		       4a		      lsr
+    271  f1a8		       4a		      lsr
+    272  f1a9		       85 82		      sta	BomberXPos
+    273  f1ab		       a9 1e		      lda	#30	; Add 30 for playfield bounds
+    274  f1ad		       65 82		      adc	BomberXPos
+    275  f1af		       85 82		      sta	BomberXPos
+    276  f1b1
+    277  f1b1		       a9 60		      lda	#96
+    278  f1b3		       85 83		      sta	BomberYPos
+    279  f1b5
+    280  f1b5		       60		      rts
+    281  f1b6
+    282  f1b6							; Sprites
+    283  f1b6				   BallDude
+    284  f1b6		       00		      .byte.b	#%00000000
+    285  f1b7		       7e		      .byte.b	#%01111110	;$5A
+    286  f1b8		       ff		      .byte.b	#%11111111	;$5A
+    287  f1b9		       ff		      .byte.b	#%11111111	;$58
+    288  f1ba		       ff		      .byte.b	#%11111111	;$56
+    289  f1bb		       9f		      .byte.b	#%10011111	;$54
+    290  f1bc		       db		      .byte.b	#%11011011	;$54
+    291  f1bd		       fb		      .byte.b	#%11111011	;$52
+    292  f1be		       76		      .byte.b	#%01110110	;$52
+    293  f1bf				   BallDudeTurning
+    294  f1bf		       00		      .byte.b	#%00000000
+    295  f1c0		       18		      .byte.b	#%00011000	;$5A
+    296  f1c1		       3c		      .byte.b	#%00111100	;$58
+    297  f1c2		       7e		      .byte.b	#%01111110	;$56
+    298  f1c3		       7e		      .byte.b	#%01111110	;$54
+    299  f1c4		       4a		      .byte.b	#%01001010	;$54
+    300  f1c5		       6a		      .byte.b	#%01101010	;$52
+    301  f1c6		       34		      .byte.b	#%00110100	;$52
+    302  f1c7		       18		      .byte.b	#%00011000	;$52
+    303  f1c8				   Adrien
+    304  f1c8		       00		      .byte.b	#%00000000
+    305  f1c9		       ff		      .byte.b	#%11111111	;$16
+    306  f1ca		       e7		      .byte.b	#%11100111	;$16
+    307  f1cb		       e7		      .byte.b	#%11100111	;$18
+    308  f1cc		       7e		      .byte.b	#%01111110	;$18
+    309  f1cd		       5a		      .byte.b	#%01011010	;$1A
+    310  f1ce		       3c		      .byte.b	#%00111100	;$1A
+    311  f1cf		       3c		      .byte.b	#%00111100	;$1C
+    312  f1d0		       18		      .byte.b	#%00011000	;$1C
+    313  f1d1
+    314  f1d1				   BallDudeCol
+    315  f1d1		       00		      .byte.b	#$00
+    316  f1d2		       5a		      .byte.b	#$5A	;
+    317  f1d3		       58		      .byte.b	#$58	;
+    318  f1d4		       56		      .byte.b	#$56	;
+    319  f1d5		       54		      .byte.b	#$54	;
+    320  f1d6		       54		      .byte.b	#$54	;
+    321  f1d7		       52		      .byte.b	#$52	;
+    322  f1d8		       52		      .byte.b	#$52	;
+    323  f1d9		       52		      .byte.b	#$52	;
+    324  f1da				   BallDudeTurningCol
+    325  f1da		       00		      .byte.b	#$00
+    326  f1db		       5a		      .byte.b	#$5A	;
+    327  f1dc		       58		      .byte.b	#$58	;
+    328  f1dd		       56		      .byte.b	#$56	;
+    329  f1de		       54		      .byte.b	#$54	;
+    330  f1df		       54		      .byte.b	#$54	;
+    331  f1e0		       52		      .byte.b	#$52	;
+    332  f1e1		       52		      .byte.b	#$52	;
+    333  f1e2		       52		      .byte.b	#$52	;
+    334  f1e3				   AdrienCol
+    335  f1e3		       00		      .byte.b	#$00
+    336  f1e4		       16		      .byte.b	#$16	;
+    337  f1e5		       16		      .byte.b	#$16	;
+    338  f1e6		       18		      .byte.b	#$18	;
+    339  f1e7		       18		      .byte.b	#$18	;
+    340  f1e8		       1a		      .byte.b	#$1A	;
+    341  f1e9		       1a		      .byte.b	#$1A	;
+    342  f1ea		       1c		      .byte.b	#$1C	;
+    343  f1eb		       1c		      .byte.b	#$1C	;
+    344  f1ec
+    345  f1ec							; Complete ROM with 4kb
+    346  fffc					      org	$FFFC
+    347  fffc		       00 f0		      word.w	Reset
+    348  fffe		       00 f0		      word.w	Reset

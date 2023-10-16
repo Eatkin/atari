@@ -15,6 +15,7 @@ AdrienPtr	word
 BallDudeColPtr	word
 AdrienColPtr	word
 JetAnimOffset	byte
+Random		byte
 
 ; Define constants
 SPRITE_HEIGHT = 9
@@ -38,6 +39,8 @@ Reset:
 	sta BomberYPos
 	lda #80
 	sta BomberXPos
+	lda #%11010100
+	sta Random
 
 ; Initialise sprite and palette pointers
 	lda #<BallDude
@@ -219,8 +222,7 @@ UpdateBomberPosition:
 	jmp EndPositionUpdate
 
 .ResetBomberPosition:
-	lda #96
-	sta BomberYPos
+	jsr SpawnBomber
 
 EndPositionUpdate:
 
@@ -246,6 +248,35 @@ SetObjXPos subroutine
 
 	sta HMP0,Y	; set fine position value
 	sta RESP0,Y	; set coarse position value
+	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; generate random number using LFSR
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SpawnBomber subroutine
+	; The LFSR
+	lda Random
+	asl
+	eor Random
+	asl
+	eor Random
+	asl
+	asl
+	eor Random
+	asl
+	rol Random
+	
+	; Divide by 4 to match playfield size
+	lsr	
+	lsr
+	sta BomberXPos
+	lda #30			; Add 30 for playfield bounds
+	adc BomberXPos
+	sta BomberXPos
+
+	lda #96
+	sta BomberYPos
+	
 	rts
 
 ; Sprites
