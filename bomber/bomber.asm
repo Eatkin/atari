@@ -98,6 +98,22 @@ StartFrame:
 	; Turn off VBLANK
 	stx VBLANK
 
+; Render scoreboard
+	; Clear playfield registers so nothing is drawn
+	lda #0
+	sta PF0
+	sta PF1
+	sta PF2
+	sta GRP0
+	sta GRP1
+	sta COLUPF
+
+	; Display 20 scanlines for scoreboard
+	REPEAT 20
+		sta WSYNC
+	REPEND
+	
+
 ; Render the visible scanlines
 VisibleScanlines:
 	; Set background colour
@@ -119,7 +135,8 @@ VisibleScanlines:
 	lda #%00000001
 	sta CTRLPF
 
-	ldx #96
+	; 84 to account for the size of the scoreboard
+	ldx #84
 
 ; Render the 96 visible scanline
 ; Using a 2 line kernel
@@ -225,7 +242,23 @@ UpdateBomberPosition:
 	jsr SpawnBomber
 
 EndPositionUpdate:
-
+; Collision checks
+CheckCollisionP0P1:
+	lda #%10000000
+	bit CXPPMM
+	bne .CollisionP0P1	; Zero flag is set if a&bit is zero (lol)
+	jmp CheckCollisionP0Playfield
+.CollisionP0P1:
+	jsr GameOver
+CheckCollisionP0Playfield:
+	lda #%10000000
+	bit CXP0FB
+	bne .CollisionP0Playfield
+	jmp EndCollisionCheck
+.CollisionP0Playfield:
+	jsr GameOver
+EndCollisionCheck:
+	sta CXCLR		; Poke clear collision check register
 	; Loop forever
 	jmp StartFrame
 
@@ -249,6 +282,16 @@ SetObjXPos subroutine
 	sta HMP0,Y	; set fine position value
 	sta RESP0,Y	; set coarse position value
 	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; GameOver Subroutine
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GameOver subroutine
+	; Set background to red for one frame
+	lda #$30
+	sta COLUBK
+	rts
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; generate random number using LFSR
