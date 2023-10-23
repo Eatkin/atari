@@ -16,10 +16,6 @@ Frame1
         .byte #%01101010;$52
         .byte #%00110100;$52
         .byte #%00011000;$52
-;---End Graphics Data---
-
-
-;---Color Data from PlayerPal 2600---
 
 ColorFrame0
         .byte #$5A;
@@ -39,4 +35,3 @@ ColorFrame1
         .byte #$52;
         .byte #$52;
         .byte #$52;
-;---End Color Data---

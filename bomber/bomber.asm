@@ -10,6 +10,11 @@ JetXPos		byte
 JetYPos		byte
 BomberXPos	byte
 BomberYPos	byte
+Score		byte
+Timer		byte
+Temp		byte
+OnesDigitOffset	word
+TensDigitOffset	word
 BallDudePtr	word
 AdrienPtr	word
 BallDudeColPtr	word
@@ -19,6 +24,7 @@ Random		byte
 
 ; Define constants
 SPRITE_HEIGHT = 9
+DIGIT_HEIGHT = 5
 
 	seg Code
 	org $F000
@@ -41,6 +47,9 @@ Reset:
 	sta BomberXPos
 	lda #%11010100
 	sta Random
+	lda #0
+	sta Score
+	sta Timer
 
 ; Initialise sprite and palette pointers
 	lda #<BallDude
@@ -76,6 +85,8 @@ StartFrame:
 	ldy #1		; Corresponds to p1
 	jsr SetObjXPos
 
+	jsr CalculateDigitOffset	; Calculate scoreboard digit lookup table offset
+
 	; Poke registers
 	sta WSYNC
 	sta HMOVE
@@ -106,7 +117,11 @@ StartFrame:
 	sta PF2
 	sta GRP0
 	sta GRP1
+	lda #$1C
 	sta COLUPF
+	; Do not reflect scoreboard
+	lda #0
+	sta CTRLPF
 
 	; Display 20 scanlines for scoreboard
 	REPEAT 20
@@ -322,7 +337,137 @@ SpawnBomber subroutine
 	
 	rts
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Set scoreboard digits to be displayed to screen
+; We do it in hex because it's easier or something idk lol
+; I'll probably come back to this to try make a decimal display
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CalculateDigitOffset subroutine
+	ldx #1
+.PrepareScoreLoop
+	; Ones digit
+	lda Score,X	; Timer when x = 1
+	and #%00001111
+	sta Temp
+	asl
+	asl
+	adc Temp
+	sta OnesDigitOffset,X
+	; Tens digit
+	lda Score,X
+	and #%11110000
+	sta Temp
+	lsr
+	lsr
+	sta Temp
+	lsr
+	lsr
+	adc Temp
+	sta TensDigitOffset,X
+
+	dex
+	bpl .PrepareScoreLoop
+	rts
+
+
 ; Sprites
+Digits:
+	.byte %01110111          ; ### ###
+	.byte %01010101          ; # # # #
+	.byte %01010101          ; # # # #
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+
+	.byte %01110111          ; ### ###
+	.byte %00010001          ;   #   #
+	.byte %01110111          ; ### ###
+	.byte %01000100          ; #   #
+	.byte %01110111          ; ### ###
+
+	.byte %01110111          ; ### ###
+	.byte %00010001          ;   #   #
+	.byte %00110011          ;  ##  ##
+	.byte %00010001          ;   #   #
+	.byte %01110111          ; ### ###
+
+	.byte %01010101          ; # # # #
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+
+	.byte %01110111          ; ### ###
+	.byte %01000100          ; #   #
+	.byte %01110111          ; ### ###
+	.byte %00010001          ;   #   #
+	.byte %01110111          ; ### ###
+
+	.byte %01110111          ; ### ###
+	.byte %01000100          ; #   #
+	.byte %01110111          ; ### ###
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+
+	.byte %01110111          ; ### ###
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+	.byte %00010001          ;   #   #
+
+	.byte %01110111          ; ### ###
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+
+	.byte %01110111          ; ### ###
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+	.byte %00010001          ;   #   #
+	.byte %01110111          ; ### ###
+
+	.byte %00100010          ;  #   #
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+	.byte %01010101          ; # # # #
+	.byte %01010101          ; # # # #
+
+	.byte %01110111          ; ### ###
+	.byte %01010101          ; # # # #
+	.byte %01100110          ; ##  ##
+	.byte %01010101          ; # # # #
+	.byte %01110111          ; ### ###
+
+	.byte %01110111          ; ### ###
+	.byte %01000100          ; #   #
+	.byte %01000100          ; #   #
+	.byte %01000100          ; #   #
+	.byte %01110111          ; ### ###
+
+	.byte %01100110          ; ##  ##
+	.byte %01010101          ; # # # #
+	.byte %01010101          ; # # # #
+	.byte %01010101          ; # # # #
+	.byte %01100110          ; ##  ##
+
+	.byte %01110111          ; ### ###
+	.byte %01000100          ; #   #
+	.byte %01110111          ; ### ###
+	.byte %01000100          ; #   #
+	.byte %01110111          ; ### ###
+
+	.byte %01110111          ; ### ###
+	.byte %01000100          ; #   #
+	.byte %01100110          ; ##  ##
+	.byte %01000100          ; #   #
+	.byte %01000100          ; #   #
+
 BallDude:
 	.byte #%00000000
         .byte #%01111110;$5A
