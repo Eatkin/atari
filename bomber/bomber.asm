@@ -21,6 +21,8 @@ BallDudeColPtr	word
 AdrienColPtr	word
 JetAnimOffset	byte
 Random		byte
+ScoreSprite	byte
+TimerSprite	byte
 
 ; Define constants
 SPRITE_HEIGHT = 9
@@ -123,10 +125,36 @@ StartFrame:
 	lda #0
 	sta CTRLPF
 
-	; Display 20 scanlines for scoreboard
-	REPEAT 20
-		sta WSYNC
-	REPEND
+	; Draw the scoreboard
+	ldx #DIGITS_HEIGHT
+.ScoreDigitLoop:
+	ldy TensDigitOffset
+	lda Digits,Y
+	and #$F0	; Mask the graphics for the ones digits
+	sta ScoreSprite
+	
+	ldy OnesDigitOffset
+	lda Digits,Y
+	and #$0F	; Mask the graphics for the tens digits
+	ora ScoreSprite
+	sta ScoreSprite
+
+	sta WSYNC	; poke
+	sta PF1		; Display score sprite
+	
+	ldy TensDigitOffset+1	; Tens digit for the timer
+	lda Digits,Y
+	and #$F0
+	sta TimerSprite
+
+	ldy OnesDigitOffset+1
+	lda Digits,Y
+	and #$0F
+	ora TimerSprite
+	sta TimerSprite
+
+	dex
+	bne .ScoreDigitLoop
 	
 
 ; Render the visible scanlines
