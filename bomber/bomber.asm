@@ -79,20 +79,6 @@ StartFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Pre-vblank calculations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	lda JetXPos
-	ldy #0		; Corresponds to P0
-	jsr SetObjXPos
-
-	lda BomberXPos
-	ldy #1		; Corresponds to p1
-	jsr SetObjXPos
-
-	jsr CalculateDigitOffset	; Calculate scoreboard digit lookup table offset
-
-	; Poke registers
-	sta WSYNC
-	sta HMOVE
-
 	; Turn on vblank and vsync
 	ldx #2
 	stx VBLANK
@@ -108,6 +94,22 @@ StartFrame:
 	REPEAT 37
 		stx WSYNC
 	REPEND
+
+	lda JetXPos
+	ldy #0		; Corresponds to P0
+	jsr SetObjXPos
+
+	lda BomberXPos
+	ldy #1		; Corresponds to p1
+	jsr SetObjXPos
+
+	jsr CalculateDigitOffset	; Calculate scoreboard digit lookup table offset
+
+	; Poke registers
+	sta WSYNC
+	sta HMOVE
+
+	ldx #0
 	; Turn off VBLANK
 	stx VBLANK
 
@@ -119,14 +121,9 @@ StartFrame:
 	sta PF2
 	sta GRP0
 	sta GRP1
-	lda #$1C
-	sta COLUPF
-	; Do not reflect scoreboard
-	lda #0
-	sta CTRLPF
 
 	; Draw the scoreboard
-	ldx #DIGITS_HEIGHT
+	ldx #DIGIT_HEIGHT
 .ScoreDigitLoop:
 	ldy TensDigitOffset
 	lda Digits,Y
@@ -153,8 +150,28 @@ StartFrame:
 	ora TimerSprite
 	sta TimerSprite
 
+	; Waste clock cycles
+	jsr Sleep12Cycles
+
+	sta PF1
+	
+	; 2-kernel display so strobe
+	ldy ScoreSprite
+	sta WSYNC
+
+	sty PF1
+	inc TensDigitOffset
+	inc TensDigitOffset+1
+	inc OnesDigitOffset
+	inc OnesDigitOffset+1
+
+	jsr Sleep12Cycles
+
 	dex
+	sta PF1
 	bne .ScoreDigitLoop
+	
+	sta WSYNC
 	
 
 ; Render the visible scanlines
@@ -395,6 +412,13 @@ CalculateDigitOffset subroutine
 
 	dex
 	bpl .PrepareScoreLoop
+	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Sleep 12 cycles
+; jsr takes 6 cycle, rts takes 6 cycles
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Sleep12Cycles subroutine
 	rts
 
 
