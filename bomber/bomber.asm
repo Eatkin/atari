@@ -121,6 +121,8 @@ StartFrame:
 	sta PF2
 	sta GRP0
 	sta GRP1
+	sta CTRLPF
+	sta COLUBK
 
 	; Draw the scoreboard
 	ldx #DIGIT_HEIGHT
@@ -172,7 +174,16 @@ StartFrame:
 	bne .ScoreDigitLoop
 	
 	sta WSYNC
-	
+
+	; Add padding under the scoreboard
+	lda #0
+	sta PF0
+	sta PF1
+	sta PF2
+
+	REPEAT 3
+		sta WSYNC
+	REPEND
 
 ; Render the visible scanlines
 VisibleScanlines:
@@ -181,6 +192,11 @@ VisibleScanlines:
 	sta COLUBK
 	; Set playfield colour
 	lda #$C2
+	sta COLUPF
+	sta COLUBK
+	
+	; Set playfield colour
+	lda #$1E
 	sta COLUPF
 	
 	; Setup playfield
@@ -195,8 +211,8 @@ VisibleScanlines:
 	lda #%00000001
 	sta CTRLPF
 
-	; 84 to account for the size of the scoreboard
-	ldx #84
+	; 81 to account for the size of the scoreboard
+	ldx #81
 
 ; Render the 96 visible scanline
 ; Using a 2 line kernel
