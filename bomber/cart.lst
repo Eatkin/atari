@@ -909,18 +909,18 @@
     292  f1cc							; Max y is 96, min y is 0
     293  f1cc		       18		      clc
     294  f1cd		       a5 81		      lda	JetYPos
-    295  f1cf		       e5 09		      sbc	SPRITE_HEIGHT
+    295  f1cf		       65 08		      adc	SCOREBOARD_HEIGHT
     296  f1d1		       18		      clc
     297  f1d2		       c9 60		      cmp	#96
     298  f1d4		       90 07		      bcc	ClampYLow
     299  f1d6		       a9 60		      lda	#96
     300  f1d8		       18		      clc
-    301  f1d9		       e5 09		      sbc	SPRITE_HEIGHT
+    301  f1d9		       e5 08		      sbc	SCOREBOARD_HEIGHT
     302  f1db		       85 81		      sta	JetYPos
     303  f1dd				   ClampYLow
     304  f1dd		       18		      clc
     305  f1de		       a9 00		      lda	#0
-    306  f1e0		       65 08		      adc	SCOREBOARD_HEIGHT
+    306  f1e0		       65 09		      adc	SPRITE_HEIGHT
     307  f1e2		       18		      clc
     308  f1e3		       c5 81		      cmp	JetYPos
     309  f1e5		       90 02		      bcc	CheckP0Left

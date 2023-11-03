@@ -292,18 +292,18 @@ ClampYHigh:
 	; Max y is 96, min y is 0
 	clc
 	lda JetYPos
-	sbc SPRITE_HEIGHT
+	adc SCOREBOARD_HEIGHT
 	clc
 	cmp #96
 	bcc ClampYLow
 	lda #96
 	clc
-	sbc SPRITE_HEIGHT
+	sbc SCOREBOARD_HEIGHT
 	sta JetYPos
 ClampYLow:
 	clc
 	lda #0
-	adc SCOREBOARD_HEIGHT
+	adc SPRITE_HEIGHT
 	clc
 	cmp JetYPos
 	bcc CheckP0Left
