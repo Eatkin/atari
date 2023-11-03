@@ -23,6 +23,8 @@ JetAnimOffset	byte
 Random		byte
 ScoreSprite	byte
 TimerSprite	byte
+TerrainColour	byte
+RiverColour	byte
 
 ; Define constants
 SPRITE_HEIGHT = 9
@@ -124,6 +126,10 @@ StartFrame:
 	sta CTRLPF
 	sta COLUBK
 
+	; Set playfield colour
+	lda #$1E
+	sta COLUPF
+
 	; Draw the scoreboard
 	ldx #DIGIT_HEIGHT
 .ScoreDigitLoop:
@@ -188,15 +194,10 @@ StartFrame:
 ; Render the visible scanlines
 VisibleScanlines:
 	; Set background colour
-	lda #$84	; Blue
+	lda RiverColour
 	sta COLUBK
 	; Set playfield colour
-	lda #$C2
-	sta COLUPF
-	sta COLUBK
-	
-	; Set playfield colour
-	lda #$1E
+	lda TerrainColour
 	sta COLUPF
 	
 	; Setup playfield
@@ -323,20 +324,27 @@ CheckCollisionP0P1:
 	lda #%10000000
 	bit CXPPMM
 	bne .CollisionP0P1	; Zero flag is set if a&bit is zero (lol)
-	jmp CheckCollisionP0Playfield
+	jsr SetTerrainRiverColour
+	jmp EndCollisionCheck
 .CollisionP0P1:
 	jsr GameOver
-CheckCollisionP0Playfield:
-	lda #%10000000
-	bit CXP0FB
-	bne .CollisionP0Playfield
-	jmp EndCollisionCheck
-.CollisionP0Playfield:
-	jsr GameOver
+
 EndCollisionCheck:
 	sta CXCLR		; Poke clear collision check register
 	; Loop forever
 	jmp StartFrame
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Set terrain/river colour to green/blue
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SetTerrainRiverColour subroutine
+	lda #$C2
+	sta TerrainColour
+	lda #$84
+	sta RiverColour
+
+	rts
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; accumulator contains x-posiiton
@@ -365,7 +373,13 @@ SetObjXPos subroutine
 GameOver subroutine
 	; Set background to red for one frame
 	lda #$30
-	sta COLUBK
+	sta TerrainColour
+	sta RiverColour
+
+	lda #0
+	sta Score
+	sta Timer
+	
 	rts
 
 
@@ -396,6 +410,8 @@ SpawnBomber subroutine
 	lda #96
 	sta BomberYPos
 	
+	; Increment score by one because we avoided the Bomber well done
+	inc Score
 	rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
