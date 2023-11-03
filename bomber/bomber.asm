@@ -29,6 +29,7 @@ RiverColour	byte
 ; Define constants
 SPRITE_HEIGHT = 9
 DIGIT_HEIGHT = 5
+SCOREBOARD_HEIGHT = 8
 
 	seg Code
 	org $F000
@@ -38,9 +39,9 @@ Reset:
 
 ; Initialise RAM variables and TIA registers
 	; Set initial player coordinates
-	lda #80
+	lda #50
 	sta JetYPos
-	lda #0
+	lda #80
 	sta JetXPos
 	
 	; Set initial bomber coordinates
@@ -284,9 +285,32 @@ CheckP0Up:
 CheckP0Down:
 	lda #%00100000
 	bit SWCHA
-	bne CheckP0Left
+	bne ClampYHigh
 	dec JetYPos
+ClampYHigh:
+	; Here we will limit jet's y-range
+	; Max y is 96, min y is 0
+	clc
+	lda JetYPos
+	sbc SPRITE_HEIGHT
+	clc
+	cmp #96
+	bcc ClampYLow
+	lda #96
+	clc
+	sbc SPRITE_HEIGHT
+	sta JetYPos
+ClampYLow:
+	clc
+	lda #0
+	adc SCOREBOARD_HEIGHT
+	clc
+	cmp JetYPos
+	bcc CheckP0Left
+	sta JetYPos
 CheckP0Left:
+	; Store the X position so we can restore it if we collide with the playfield
+	ldy JetXPos
 	lda #%01000000
 	bit SWCHA
 	bne CheckP0Right 
@@ -294,8 +318,26 @@ CheckP0Left:
 CheckP0Right:
 	lda #%10000000
 	bit SWCHA
-	bne NoInput
+	bne ClampXPos
 	inc JetXPos
+ClampXPos:
+	; Check if we've collided with the playfield and if we have restore our X position to that saved in the y register
+	lda #%10000000
+	bit CXP0FB
+	beq NoInput 		;Zero flag is set if a&bit is zero (lol)
+	; This will restore the jet x position from the y register if we have hit the playfield
+	tya
+	; Collisions are precise so we need to account for different collision masks
+	; The moving sprite and static sprite are 1 pixel different
+	clc
+	cmp #80
+	bcs ShiftRight
+	adc #1
+	jmp UpdateJetPos
+ShiftRight:
+	sbc #1
+UpdateJetPos:
+	sta JetXPos
 NoInput:
 	lda #0
 	sta JetAnimOffset
