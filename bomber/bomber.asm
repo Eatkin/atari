@@ -39,7 +39,7 @@ Reset:
 
 ; Initialise RAM variables and TIA registers
 	; Set initial player coordinates
-	lda #50
+	lda #10
 	sta JetYPos
 	lda #80
 	sta JetXPos
@@ -94,7 +94,7 @@ StartFrame:
 	stx VSYNC
 
 	; Render VBLANK
-	REPEAT 37
+	REPEAT 33
 		stx WSYNC
 	REPEND
 
@@ -187,10 +187,9 @@ StartFrame:
 	sta PF0
 	sta PF1
 	sta PF2
-
-	REPEAT 3
-		sta WSYNC
-	REPEND
+	sta WSYNC
+	sta WSYNC
+	sta WSYNC
 
 ; Render the visible scanlines
 VisibleScanlines:
@@ -214,7 +213,7 @@ VisibleScanlines:
 	sta CTRLPF
 
 	; 81 to account for the size of the scoreboard
-	ldx #81
+	ldx #85
 
 ; Render the 96 visible scanline
 ; Using a 2 line kernel
@@ -260,7 +259,9 @@ VisibleScanlines:
 	sta COLUP1
 
 	dex
-	bne .GameLineLoop	
+	bne .GameLineLoop
+
+	sta WSYNC	
 
 ; Display vblank
 Overscan:
@@ -292,19 +293,13 @@ ClampYHigh:
 	; Max y is 96, min y is 0
 	clc
 	lda JetYPos
-	adc SCOREBOARD_HEIGHT
-	clc
-	cmp #96
+	cmp #76
 	bcc ClampYLow
-	lda #96
-	clc
-	sbc SCOREBOARD_HEIGHT
+	lda #76
 	sta JetYPos
 ClampYLow:
 	clc
-	lda #0
-	adc SPRITE_HEIGHT
-	clc
+	lda #1
 	cmp JetYPos
 	bcc CheckP0Left
 	sta JetYPos
@@ -451,9 +446,14 @@ SpawnBomber subroutine
 
 	lda #96
 	sta BomberYPos
-	
-	; Increment score by one because we avoided the Bomber well done
-	inc Score
+
+.SetScoreValues:
+	sed			; Turn on decimal mode
+	lda Score
+	clc
+	adc #1
+	sta Score
+	cld			; Turn off decimal mode
 	rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
