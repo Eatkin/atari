@@ -10,6 +10,8 @@ JetXPos		byte
 JetYPos		byte
 BomberXPos	byte
 BomberYPos	byte
+MissileXPos	byte
+MissileYPos	byte
 Score		byte
 Timer		byte
 Temp		byte
@@ -50,11 +52,26 @@ Reset:
 	sta BomberYPos
 	lda #80
 	sta BomberXPos
+
 	lda #%11010100
 	sta Random
+
 	lda #0
 	sta Score
 	sta Timer
+
+; Declare macros
+	MAC DRAW_MISSILE
+		lda #0
+		; x contains the scanline number
+		cpx MissileYPos
+		bne .SkipMissileDraw
+.DrawMissile:
+		lda #%00000010		; Enable missile 0
+		inc MissileYPos
+.SkipMissileDraw:
+		sta ENAM0		; Store correct value in TIA missile register
+	ENDM
 
 ; Initialise sprite and palette pointers
 	lda #<BallDude
@@ -104,6 +121,10 @@ StartFrame:
 
 	lda BomberXPos
 	ldy #1		; Corresponds to p1
+	jsr SetObjXPos
+
+	lda MissileXPos
+	ldy #2		; Corresponds to missile0
 	jsr SetObjXPos
 
 	jsr CalculateDigitOffset	; Calculate scoreboard digit lookup table offset
@@ -212,12 +233,13 @@ VisibleScanlines:
 	lda #%00000001
 	sta CTRLPF
 
-	; 81 to account for the size of the scoreboard
+	; Number of remaining scanlines
 	ldx #85
 
 ; Render the 96 visible scanline
 ; Using a 2 line kernel
 .GameLineLoop:
+	DRAW_MISSILE		; Macro to see if we will draw the missile
 .InsideBallDude:
 	txa
 	sec
@@ -319,7 +341,7 @@ ClampXPos:
 	; Check if we've collided with the playfield and if we have restore our X position to that saved in the y register
 	lda #%10000000
 	bit CXP0FB
-	beq NoInput 		;Zero flag is set if a&bit is zero (lol)
+	beq CheckButtonPressed		;Zero flag is set if a&bit is zero (lol)
 	; This will restore the jet x position from the y register if we have hit the playfield
 	tya
 	; Collisions are precise so we need to account for different collision masks
@@ -333,6 +355,20 @@ ShiftRight:
 	sbc #1
 UpdateJetPos:
 	sta JetXPos
+CheckButtonPressed:
+	lda #%10000000
+	bit INPT4
+	bne NoInput
+	; Set missile coorindates
+	lda JetXPos
+	clc
+	adc #5
+	sta MissileXPos
+	lda JetYPos
+	clc
+	adc #5
+	sta MissileYPos
+	
 NoInput:
 	lda #0
 	sta JetAnimOffset
@@ -362,9 +398,24 @@ CheckCollisionP0P1:
 	bit CXPPMM
 	bne .CollisionP0P1	; Zero flag is set if a&bit is zero (lol)
 	jsr SetTerrainRiverColour
-	jmp EndCollisionCheck
+	jmp .CheckCollisionM0P1
 .CollisionP0P1:
 	jsr GameOver
+.CheckCollisionM0P1:
+	lda #%10000000
+	bit CXM0P
+	bne .CollisionM0P1
+	jmp EndCollisionCheck
+.CollisionM0P1:
+	jsr SpawnBomber
+	sed
+	clc
+	lda Score
+	adc #1
+	sta Score
+	cld
+	lda #0
+	sta MissileYPos
 
 EndCollisionCheck:
 	sta CXCLR		; Poke clear collision check register
@@ -449,10 +500,10 @@ SpawnBomber subroutine
 
 .SetScoreValues:
 	sed			; Turn on decimal mode
-	lda Score
+	lda Timer 
 	clc
 	adc #1
-	sta Score
+	sta Timer
 	cld			; Turn off decimal mode
 	rts
 
