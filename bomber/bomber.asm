@@ -111,7 +111,7 @@ StartFrame:
 	stx VSYNC
 
 	; Render VBLANK
-	REPEAT 33
+	REPEAT 32
 		stx WSYNC
 	REPEND
 
@@ -128,6 +128,8 @@ StartFrame:
 	jsr SetObjXPos
 
 	jsr CalculateDigitOffset	; Calculate scoreboard digit lookup table offset
+
+	jsr GenerateJetSound
 
 	; Poke registers
 	sta WSYNC
@@ -467,7 +469,8 @@ GameOver subroutine
 	lda #0
 	sta Score
 	sta Timer
-	
+	sta MissileYPos
+
 	rts
 
 
@@ -538,6 +541,28 @@ CalculateDigitOffset subroutine
 	dex
 	bpl .PrepareScoreLoop
 	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Generate Jet Sound
+; Play the Jet sounds based on jet y pos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GenerateJetSound subroutine
+	lda JetYPos
+	lsr
+	lsr
+	lsr
+	; Accumulator now holds a value between 0 and 12
+	sta Temp
+	lda #3
+	sta AUDV0	; Store volume (0-15)
+	lda #31 
+	sec
+	sbc Temp
+	sta AUDF0	; Store frequency (0-31, 31 is the lowest)
+	lda #8
+	sta AUDC0	; Store tone
+
+	rts	
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Sleep 12 cycles

@@ -1,22 +1,22 @@
 --- Symbol List (sorted by symbol)
-0.CheckCollisionM0P1     f254              (R )
-0.CollisionM0P1          f25d              (R )
-0.CollisionP0P1          f251              (R )
-0.DrawSpriteP0           f154              (R )
-0.DrawSpriteP1           f16c              (R )
-0.GameLineLoop           f13e              (R )
-0.InsideAdrien           f162                  
-0.InsideBallDude         f14a                  
-0.ResetBomberPosition    f242              (R )
-0.ScoreDigitLoop         f0cd              (R )
+0.CheckCollisionM0P1     f252              (R )
+0.CollisionM0P1          f25b              (R )
+0.CollisionP0P1          f24f              (R )
+0.DrawSpriteP0           f152              (R )
+0.DrawSpriteP1           f16a              (R )
+0.GameLineLoop           f13c              (R )
+0.InsideAdrien           f160                  
+0.InsideBallDude         f148                  
+0.ResetBomberPosition    f240              (R )
+0.ScoreDigitLoop         f0cb              (R )
 1.CLEAR_STACK            f006              (R )
-2.DrawMissile            f144                  
-2.SkipMissileDraw        f148              (R )
-4.DivideLoop             f27e              (R )
-6.SetScoreValues         f2b9                  
-7.PrepareScoreLoop       f2c5              (R )
-Adrien                   f348              (R )
-AdrienCol                f363              (R )
+2.DrawMissile            f142                  
+2.SkipMissileDraw        f146              (R )
+4.DivideLoop             f27c              (R )
+6.SetScoreValues         f2b7                  
+7.PrepareScoreLoop       f2c3              (R )
+Adrien                   f346              (R )
+AdrienCol                f361              (R )
 AdrienColPtr             0093              (R )
 AdrienPtr                008f              (R )
 AUDC0                    0015                  
@@ -25,24 +25,24 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-BallDude                 f336              (R )
-BallDudeCol              f351              (R )
+BallDude                 f334              (R )
+BallDudeCol              f34f              (R )
 BallDudeColPtr           0091              (R )
 BallDudePtr              008d              (R )
-BallDudeTurning          f33f                  
-BallDudeTurningCol       f35a                  
+BallDudeTurning          f33d                  
+BallDudeTurningCol       f358                  
 BomberXPos               0082              (R )
 BomberYPos               0083              (R )
-CalculateDigitOffset     f2c3              (R )
-CheckButtonPressed       f216              (R )
-CheckCollisionP0P1       f245                  
-CheckP0Down              f1d0              (R )
-CheckP0Left              f1ed              (R )
-CheckP0Right             f1f8              (R )
-CheckP0Up                f1c7                  
-ClampXPos                f201              (R )
-ClampYHigh               f1d9              (R )
-ClampYLow                f1e4              (R )
+CalculateDigitOffset     f2c1              (R )
+CheckButtonPressed       f214              (R )
+CheckCollisionP0P1       f243                  
+CheckP0Down              f1ce              (R )
+CheckP0Left              f1eb              (R )
+CheckP0Right             f1f6              (R )
+CheckP0Up                f1c5                  
+ClampXPos                f1ff              (R )
+ClampYHigh               f1d7              (R )
+ClampYLow                f1e2              (R )
 COLUBK                   0009              (R )
 COLUP0                   0006              (R )
 COLUP1                   0007              (R )
@@ -58,13 +58,13 @@ CXP0FB                   0002              (R )
 CXP1FB                   0003                  
 CXPPMM                   0007              (R )
 DIGIT_HEIGHT             0005              (R )
-Digits                   f2e6              (R )
+Digits                   f2e4              (R )
 ENABL                    001f                  
 ENAM0                    001d              (R )
 ENAM1                    001e                  
-EndCollisionCheck        f26d              (R )
-EndPositionUpdate        f245              (R )
-GameOver                 f28f              (R )
+EndCollisionCheck        f26b              (R )
+EndPositionUpdate        f243              (R )
+GameOver                 f28d              (R )
 GRP0                     001b              (R )
 GRP1                     001c              (R )
 HMBL                     0024                  
@@ -86,12 +86,12 @@ JetXPos                  0080              (R )
 JetYPos                  0081              (R )
 MissileXPos              0084              (R )
 MissileYPos              0085              (R )
-NoChange                 f236              (R )
-NoInput                  f22a              (R )
+NoChange                 f234              (R )
+NoInput                  f228              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005              (R )
 OnesDigitOffset          0089              (R )
-Overscan                 f181                  
+Overscan                 f17f                  
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
@@ -111,11 +111,11 @@ RSYNC                    0003
 Score                    0086              (R )
 SCOREBOARD_HEIGHT        0008                  
 ScoreSprite              0097              (R )
-SetObjXPos               f27b              (R )
-SetTerrainRiverColour    f272              (R )
-ShiftRight               f212              (R )
-Sleep12Cycles            f2e5              (R )
-SpawnBomber              f29c              (R )
+SetObjXPos               f279              (R )
+SetTerrainRiverColour    f270              (R )
+ShiftRight               f210              (R )
+Sleep12Cycles            f2e3              (R )
+SpawnBomber              f29a              (R )
 SPRITE_HEIGHT            0009              (R )
 StartFrame               f045              (R )
 SWACNT                   0281                  
@@ -135,15 +135,15 @@ TIM8T                    0295
 Timer                    0087              (R )
 TimerSprite              0098              (R )
 TIMINT                   0285                  
-UpdateBomberPosition     f236                  
-UpdateJetPos             f214              (R )
+UpdateBomberPosition     f234                  
+UpdateJetPos             f212              (R )
 VBLANK                   0001              (R )
 VDELBL                   0027                  
 VDELP0                   0025                  
 VDELP1                   0026                  
 VERSION_MACRO            0069                  
 VERSION_VCS              0069                  
-VisibleScanlines         f124                  
+VisibleScanlines         f122                  
 VSYNC                    0000              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.
